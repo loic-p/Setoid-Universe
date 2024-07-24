@@ -24,3 +24,7 @@ propositional equality.
 Alternatively, we can put the equalities in Type, which provides us with
 unique choice/function comprehension at the cost of losing impredicative
 quantification.
+
+-------
+
+The Coq proof has been tested to compile with Coq 8.16.1
