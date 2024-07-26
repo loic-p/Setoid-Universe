@@ -424,18 +424,18 @@ Proof.
 Defined.
 
 
-(* Homogeneous equality
+(* Homogeneous observational equality
    the choice between homogeneous and heterogeneous is purely a matter of taste... *)
 
-Definition id0 (A : U0) (a b : El0 A) : El0 Prop0.
+Definition obseq0 (A : U0) (a b : El0 A) : El0 Prop0.
 Proof.
   exact (eq0 A A a b).
 Defined.
 
-Definition id0e (A0 A1 : U0) (Ae : eqU0 A0 A1)
+Definition obseq0e (A0 A1 : U0) (Ae : eqU0 A0 A1)
   (a0 : El0 A0) (a1 : El0 A1) (ae : eq0 A0 A1 a0 a1)
   (b0 : El0 A0) (b1 : El0 A1) (be : eq0 A0 A1 b0 b1)
-  : eq0 Prop0 Prop0 (id0 A0 a0 b0) (id0 A1 a1 b1).
+  : eq0 Prop0 Prop0 (obseq0 A0 a0 b0) (obseq0 A1 a1 b1).
 Proof.
   split.
   - intro e0. pose proof (trans0 A1 A0 (symU0 A0 A1 Ae) A0 (sym0 A0 A1 ae) e0) as e1.
@@ -444,20 +444,20 @@ Proof.
     exact (trans0 A0 A1 Ae A0 e1 (sym0 A0 A1 be)).
 Defined.
 
-Definition idrefl0 (A : U0) (a : El0 A) : id0 A a a.
+Definition obseq_refl0 (A : U0) (a : El0 A) : obseq0 A a a.
 Proof.
   exact (refl0 A a).
 Defined.
 
-Definition id1 (A : U1) (a b : El1 A) : El0 Prop0.
+Definition obseq1 (A : U1) (a b : El1 A) : El0 Prop0.
 Proof.
   exact (eq1 A A a b).
 Defined.
 
-Definition id1e (A0 A1 : U1) (Ae : eqU1 A0 A1)
+Definition obseq1e (A0 A1 : U1) (Ae : eqU1 A0 A1)
   (a0 : El1 A0) (a1 : El1 A1) (ae : eq1 A0 A1 a0 a1)
   (b0 : El1 A0) (b1 : El1 A1) (be : eq1 A0 A1 b0 b1)
-  : eq0 Prop0 Prop0 (id1 A0 a0 b0) (id1 A1 a1 b1).
+  : eq0 Prop0 Prop0 (obseq1 A0 a0 b0) (obseq1 A1 a1 b1).
 Proof.
   split.
   - intro e0. pose proof (trans1 A1 A0 (symU1 A0 A1 Ae) A0 (sym1 A0 A1 ae) e0) as e1.
@@ -466,21 +466,21 @@ Proof.
     exact (trans1 A0 A1 Ae A0 e1 (sym1 A0 A1 be)).
 Defined.
 
-Definition idrefl1 (A : U1) (a : El1 A) : id1 A a a.
+Definition obseq_refl1 (A : U1) (a : El1 A) : obseq1 A a a.
 Proof.
   exact (refl1 A a).
 Defined.
 
 (* Cast operator *)
 
-Definition idcast0 (A B : U0) (e : id1 U01 A B) (a : El0 A) : El0 B.
+Definition obseq_cast0 (A B : U0) (e : obseq1 U01 A B) (a : El0 A) : El0 B.
 Proof.
   exact (cast0 A B e a).
 Defined.
 
-Definition idcast0e (A0 A1 : U0) (Ae : eqU0 A0 A1) (B0 B1 : U0) (Be : eqU0 B0 B1)
-  (e0 : id1 U01 A0 B0) (e1 : id1 U01 A1 B1)
-  (a0 : El0 A0) (a1 : El0 A1) (ae : eq0 A0 A1 a0 a1) : eq0 B0 B1 (idcast0 A0 B0 e0 a0) (idcast0 A1 B1 e1 a1).
+Definition obseq_cast0e (A0 A1 : U0) (Ae : eqU0 A0 A1) (B0 B1 : U0) (Be : eqU0 B0 B1)
+  (e0 : obseq1 U01 A0 B0) (e1 : obseq1 U01 A1 B1)
+  (a0 : El0 A0) (a1 : El0 A1) (ae : eq0 A0 A1 a0 a1) : eq0 B0 B1 (obseq_cast0 A0 B0 e0 a0) (obseq_cast0 A1 B1 e1 a1).
 Proof.
   pose proof (sym0 A0 B0 (cast0_eq A0 B0 e0 a0)) as h0.
   pose proof (trans0 B0 A0 (symU0 A0 B0 e0) A1 h0 ae) as h1.
@@ -488,7 +488,7 @@ Proof.
   exact (transU0 Be (symU0 A1 B1 e1)).
 Defined.
 
-Definition idcast_refl0 (A : U0) (a : El0 A) : id0 A a (idcast0 A A (idrefl1 U01 A) a).
+Definition obseq_cast_refl0 (A : U0) (a : El0 A) : obseq0 A a (obseq_cast0 A A (obseq_refl1 U01 A) a).
 Proof.
   exact (cast0_eq A A (reflU0 A) a).
 Defined.
@@ -496,38 +496,44 @@ Defined.
 
 (* Equality laws: symmetry, transitivity, fapply, proof irrelevance, funext, propext *)
 
-Definition id_sym0 (A : U0) (a b : El0 A) : id0 A a b -> id0 A b a.
+Definition obseq_sym0 (A : U0) (a b : El0 A) : obseq0 A a b -> obseq0 A b a.
 Proof.
   apply sym0.
 Defined.
 
-Definition id_trans0 (A : U0) (a b c : El0 A) : id0 A a b -> id0 A b c -> id0 A a c.
+Definition obseq_trans0 (A : U0) (a b c : El0 A) : obseq0 A a b -> obseq0 A b c -> obseq0 A a c.
 Proof.
   apply trans0. apply reflU0.
 Defined.
 
-Definition id_ap0 (A B : U0) (f : El0 (arr0 A B)) (a0 a1 : El0 A) :
-  id0 A a0 a1 -> id0 B (fst f a0) (fst f a1).
+Definition obseq_ap0 (A B : U0) (f : El0 (arr0 A B)) (a0 a1 : El0 A) :
+  obseq0 A a0 a1 -> obseq0 B (fst f a0) (fst f a1).
 Proof.
   exact (snd f a0 a1).
 Defined.
 
-Definition proof_irr0 (P : El0 Prop0) (p q : P) : id0 (emb0 P) p q.
+Definition proof_irr0 (P : El0 Prop0) (p q : P) : obseq0 (emb0 P) p q.
 Proof.
   easy.
 Defined.
 
 Definition funext0 (A : U0) (P : El1 (arr1 (emb1 A) U01)) (f g : El0 (pi0 A P)) :
-  (forall a, id0 (fst P a) (fst f a) (fst g a)) -> id0 (pi0 A P) f g.
+  (forall a, obseq0 (fst P a) (fst f a) (fst g a)) -> obseq0 (pi0 A P) f g.
 Proof.
   intro H. intros a0 a1 ae.
   exact (trans0 (fst P a0) (fst P a0) (reflU0 _) (fst P a1) (H a0) (snd g a0 a1 ae)).
 Defined.
 
-Definition propext0 (P Q : El0 Prop0) : (P <-> Q) -> id0 Prop0 P Q.
+Definition propext0 (P Q : El0 Prop0) : (P <-> Q) -> obseq0 Prop0 P Q.
 Proof.
   easy.
 Defined.
+
+(* NB : a J eliminator can be derived from cast + ap + UIP
+   However, the computation rule for J on reflexivity is weakened to a propositional equality.
+
+   If we use Impredicative-Set instead of Prop, then we can use a Swan-style encoding to define
+   an observational equality with definitional J-on-refl *)
 
 
 (* Accessibility predicate
