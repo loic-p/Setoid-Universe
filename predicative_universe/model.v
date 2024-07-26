@@ -522,13 +522,79 @@ Proof.
   eapply biimpl_sym. apply id0_is_obseq0.
 Defined.
 
-(* TODO : J eliminator *)
+Definition J0 (A : U0) (a : El0 A)
+  (P : El1 (Pi1 (emb1 A) (fun b => arr1 (emb1 (emb0 (id0 A a b))) U01)
+                (fun b0 b1 be => mkAndEx (id0e A A (reflU0 A) a a (refl0 A a) b0 b1 be) (fun _ _ _ => I))))
+  (t : El0 (fst (fst P a) (id_refl0 A a))) (b : El0 A) (e : id0 A a b)
+  : El0 (fst (fst P b) e).
+Proof.
+  destruct e as [ | b e ].
+  - exact t.
+  - refine (cast0 (fst (fst P a) (id_refl0 A a)) (fst (fst P b) (id_obseq0 A a b e)) _ t).
+    refine (snd P a b e (id_refl0 A a) (id_obseq0 A a b e) I).
+Defined.
 
-(* Definition J0 (A : U0) (a : El0 A) *)
-(*   (P : El1 (Pi1 (emb1 A) (fun b => arr1 (emb1 (emb0 (id0 A a b))) U01) *)
-(*                 (fun b0 b1 be => mkAndEx (id0e A A (reflU0 A) a a (refl0 A a) b0 b1 be) (fun _ _ _ => I)))) *)
-(*   (t : El0 (fst (fst P a) (id_refl0 A a))) (b : El0 A) (e : id0 A a b) *)
-(*   : El0 (fst (fst P b) e). *)
+Definition J0e (A0 A1 : U0) (Ae : eqU0 A0 A1)
+  (a0 : El0 A0) (a1 : El0 A1) (ae : eq0 A0 A1 a0 a1)
+  (P0 : El1 (Pi1 (emb1 A0) (fun b => arr1 (emb1 (emb0 (id0 A0 a0 b))) U01)
+                (fun b0 b1 be => mkAndEx (id0e A0 A0 (reflU0 A0) a0 a0 (refl0 A0 a0) b0 b1 be) (fun _ _ _ => I))))
+  (P1 : El1 (Pi1 (emb1 A1) (fun b => arr1 (emb1 (emb0 (id0 A1 a1 b))) U01)
+                (fun b0 b1 be => mkAndEx (id0e A1 A1 (reflU0 A1) a1 a1 (refl0 A1 a1) b0 b1 be) (fun _ _ _ => I))))
+  (Pe : eq1 (Pi1 (emb1 A0) (fun b => arr1 (emb1 (emb0 (id0 A0 a0 b))) U01)
+                (fun b0 b1 be => mkAndEx (id0e A0 A0 (reflU0 A0) a0 a0 (refl0 A0 a0) b0 b1 be) (fun _ _ _ => I)))
+            (Pi1 (emb1 A1) (fun b => arr1 (emb1 (emb0 (id0 A1 a1 b))) U01)
+                (fun b0 b1 be => mkAndEx (id0e A1 A1 (reflU0 A1) a1 a1 (refl0 A1 a1) b0 b1 be) (fun _ _ _ => I)))
+            P0 P1)
+  (t0 : El0 (fst (fst P0 a0) (id_refl0 A0 a0))) (t1 : El0 (fst (fst P1 a1) (id_refl0 A1 a1)))
+  (te : eq0 (fst (fst P0 a0) (id_refl0 A0 a0)) (fst (fst P1 a1) (id_refl0 A1 a1)) t0 t1)
+  (b0 : El0 A0) (b1 : El0 A1) (be : eq0 A0 A1 b0 b1)
+  (e0 : id0 A0 a0 b0) (e1 : id0 A1 a1 b1)
+  : eq0 (fst (fst P0 b0) e0) (fst (fst P1 b1) e1) (J0 A0 a0 P0 t0 b0 e0) (J0 A1 a1 P1 t1 b1 e1).
+Proof.
+  destruct e0 as [ | b0 e0 ].
+  - destruct e1 as [ | b1 e1 ].
+    + exact te.
+    + refine (trans0 (fst (fst P0 a0) (id_refl0 A0 a0)) (fst (fst P1 a1) (id_refl0 A1 a1)) _ (fst (fst P1 b1) (id_obseq0 A1 a1 b1 e1)) te _).
+      exact (Pe a0 a1 ae (id_refl0 A0 a0) (id_refl0 A1 a1) I).
+      exact (cast0_eq (fst (fst P1 a1) (id_refl0 A1 a1)) (fst (fst P1 b1) (id_obseq0 A1 a1 b1 e1)) _ t1).
+  - destruct e1 as [ | b1 e1 ].
+    + refine (trans0 (fst (fst P0 b0) (id_obseq0 A0 a0 b0 e0)) (fst (fst P0 a0) (id_refl0 A0 a0)) _ (fst (fst P1 a1) (id_refl0 A1 a1)) _ te).
+      exact (snd P0 b0 a0 (sym0 _ _ e0) (id_obseq0 A0 a0 b0 e0) (id_refl0 A0 a0) I).
+      exact (sym0 _ _ (cast0_eq (fst (fst P0 a0) (id_refl0 A0 a0)) (fst (fst P0 b0) (id_obseq0 A0 a0 b0 e0)) _ t0)).
+    + refine (trans0 (fst (fst P0 b0) (id_obseq0 A0 a0 b0 e0)) (fst (fst P0 a0) (id_refl0 A0 a0)) _ (fst (fst P1 b1) (id_obseq0 A1 a1 b1 e1)) _ _).
+      exact (snd P0 b0 a0 (sym0 _ _ e0) (id_obseq0 A0 a0 b0 e0) (id_refl0 A0 a0) I).
+      exact (sym0 _ _ (cast0_eq (fst (fst P0 a0) (id_refl0 A0 a0)) (fst (fst P0 b0) (id_obseq0 A0 a0 b0 e0)) _ t0)).
+      refine (trans0 (fst (fst P0 a0) (id_refl0 A0 a0)) (fst (fst P1 a1) (id_refl0 A1 a1)) _ (fst (fst P1 b1) (id_obseq0 A1 a1 b1 e1)) te _).
+      exact (Pe a0 a1 ae (id_refl0 A0 a0) (id_refl0 A1 a1) I).
+      exact (cast0_eq (fst (fst P1 a1) (id_refl0 A1 a1)) (fst (fst P1 b1) (id_obseq0 A1 a1 b1 e1)) _ t1).
+Defined.
+
+Definition J_on_refl0 (A : U0) (a : El0 A)
+  (P : El1 (Pi1 (emb1 A) (fun b => arr1 (emb1 (emb0 (id0 A a b))) U01)
+                (fun b0 b1 be => mkAndEx (id0e A A (reflU0 A) a a (refl0 A a) b0 b1 be) (fun _ _ _ => I))))
+  (t : El0 (fst (fst P a) (id_refl0 A a)))
+  : J0 A a P t a (id_refl0 A a) = t.
+Proof.
+  reflexivity.
+Defined.
+
+Definition J_on_refl0e (A0 A1 : U0) (Ae : eqU0 A0 A1)
+  (a0 : El0 A0) (a1 : El0 A1) (ae : eq0 A0 A1 a0 a1)
+  (P0 : El1 (Pi1 (emb1 A0) (fun b => arr1 (emb1 (emb0 (id0 A0 a0 b))) U01)
+                (fun b0 b1 be => mkAndEx (id0e A0 A0 (reflU0 A0) a0 a0 (refl0 A0 a0) b0 b1 be) (fun _ _ _ => I))))
+  (P1 : El1 (Pi1 (emb1 A1) (fun b => arr1 (emb1 (emb0 (id0 A1 a1 b))) U01)
+                (fun b0 b1 be => mkAndEx (id0e A1 A1 (reflU0 A1) a1 a1 (refl0 A1 a1) b0 b1 be) (fun _ _ _ => I))))
+  (Pe : eq1 (Pi1 (emb1 A0) (fun b => arr1 (emb1 (emb0 (id0 A0 a0 b))) U01)
+                (fun b0 b1 be => mkAndEx (id0e A0 A0 (reflU0 A0) a0 a0 (refl0 A0 a0) b0 b1 be) (fun _ _ _ => I)))
+            (Pi1 (emb1 A1) (fun b => arr1 (emb1 (emb0 (id0 A1 a1 b))) U01)
+                (fun b0 b1 be => mkAndEx (id0e A1 A1 (reflU0 A1) a1 a1 (refl0 A1 a1) b0 b1 be) (fun _ _ _ => I)))
+            P0 P1)
+  (t0 : El0 (fst (fst P0 a0) (id_refl0 A0 a0))) (t1 : El0 (fst (fst P1 a1) (id_refl0 A1 a1)))
+  (te : eq0 (fst (fst P0 a0) (id_refl0 A0 a0)) (fst (fst P1 a1) (id_refl0 A1 a1)) t0 t1)
+  : J0e A0 A1 Ae a0 a1 ae P0 P1 Pe t0 t1 te a0 a1 ae (id_refl0 A0 a0) (id_refl0 A1 a1) = te.
+Proof.
+  reflexivity.
+Defined.
 
 
 (* Quotient types à la Hofmann *)
