@@ -10,6 +10,7 @@
 
 Set Universe Polymorphism.
 Set Primitive Projections.
+Set Polymorphic Inductive Cumulativity.
 Require Import utils.
 Require Import univ0.
 
@@ -227,11 +228,11 @@ Proof.
     + exact (fun n => n).
     + exact (fun n => n).
     + intro C. pattern C ; eapply U0_rect ; clear C ; try easy.
-      intros a b c. eapply nateq_trans.
+      intros a b c. eapply nateq_trans@{i}.
     + intro C. pattern C ; eapply U0_rect ; clear C ; try easy.
-      intros a b c. eapply nateq_trans.
-    + eapply nateq_refl.
-    + eapply nateq_refl.
+      intros a b c. eapply nateq_trans@{i}.
+    + eapply nateq_refl@{i}.
+    + eapply nateq_refl@{i}.
   (* Sigma *)
   - intros A B eAB IHA P Q ePQ IHP Pe Qe. unshelve econstructor.
     + intros [ a p ]. econstructor.

@@ -7,6 +7,7 @@
 
 Set Universe Polymorphism.
 Set Primitive Projections.
+Set Polymorphic Inductive Cumulativity.
 
 (* Basic datatypes *)
 

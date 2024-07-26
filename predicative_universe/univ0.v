@@ -6,6 +6,7 @@
 
 Set Universe Polymorphism.
 Set Primitive Projections.
+Set Polymorphic Inductive Cumulativity.
 Require Import utils.
 
 (* The ideal definition of U0 is inductive-recursive, but IR is not supported by coq.
@@ -52,7 +53,7 @@ Proof.
     exact (fun _ _ => True).
   - intros _ [ | | | | | ].
     1,3,4,5,6: exact (fun _ _ => False).
-    exact nateq.
+    exact nateq@{i}.
   - intros _ [ | | B Bu Q Qu | | | ].
     1,2,4,5,6: exact (fun _ _ => False).
     intros [ a p ] [ b q ].
@@ -97,7 +98,7 @@ Defined.
 
 Inductive extU0@{i j k} : forall (A : Type@{i}) (Au : inU0@{i j} A), Type@{j} :=
 | extEmb0 : forall (P : Type@{i}), extU0 P (cEmb0 P)
-| extN : extU0 nat cN
+| extN : extU0 nat@{i} cN
 | extSigma : forall (A : Type@{i}) (Au : inU0 A) (Ae : extU0 A Au)
                     (P : A -> Type@{i}) (Pu : forall a, inU0 (P a))
                     (Pext : forall a0 a1, inU0_eq Au Au a0 a1 -> inU0_eqU@{i j k} (Pu a0) (Pu a1))
@@ -136,30 +137,33 @@ Arguments mkU0 {_} {_}.
 
 Check (El0 : U0 -> Type).
 
-Definition eq0 (A B : U0) (a : El0 A) (b : El0 B) : Type :=
-  inU0_eq (in0 A) (in0 B) a b.
+Definition eq0@{i j k} (A B : U0@{i j k}) (a : El0 A) (b : El0 B) : Type@{i} :=
+  inU0_eq@{i j} (in0 A) (in0 B) a b.
 
-Definition eqU0 (A B : U0) : Type :=
-  inU0_eqU (in0 A) (in0 B).
+Definition eqU0@{i j k} (A B : U0@{i j k}) : Type@{j} :=
+  inU0_eqU@{i j k} (in0 A) (in0 B).
 
 (* Constructors *)
 
-Definition emb0 (P : Type) : U0 := mkU0 (extEmb0 P).
-Definition nat0 : U0 := mkU0 extN.
-Definition Sigma0 (A : U0) (B : El0 A -> U0) (Be : forall a0 a1 : El0 A, eq0 A A a0 a1 -> eqU0 (B a0) (B a1)) : U0 :=
+Definition emb0@{i j k} (P : Type@{i}) : U0@{i j k} := mkU0 (extEmb0 P).
+Definition nat0@{i j k} : U0@{i j k} := mkU0 extN.
+Definition Sigma0@{i j k} (A : U0@{i j k}) (B : El0 A -> U0@{i j k})
+                          (Be : forall a0 a1 : El0 A, eq0 A A a0 a1 -> eqU0 (B a0) (B a1)) : U0@{i j k} :=
   mkU0 (extSigma (El0 A) (in0 A) (ext0 A)
               (fun a => El0 (B a)) (fun a => in0 (B a))
               Be (fun a => ext0 (B a))).
-Definition Pi0 (A : U0) (B : El0 A -> U0) (Be : forall a0 a1 : El0 A, eq0 A A a0 a1 -> eqU0 (B a0) (B a1)) : U0 :=
+Definition Pi0@{i j k} (A : U0@{i j k}) (B : El0 A -> U0@{i j k})
+                       (Be : forall a0 a1 : El0 A, eq0 A A a0 a1 -> eqU0 (B a0) (B a1)) : U0@{i j k} :=
   mkU0 (extPi (El0 A) (in0 A) (ext0 A)
               (fun a => El0 (B a)) (fun a => in0 (B a))
               Be (fun a => ext0 (B a))).
-Definition W0 (A : U0) (B : El0 A -> U0) (Be : forall a0 a1 : El0 A, eq0 A A a0 a1 -> eqU0 (B a0) (B a1)) : U0 :=
+Definition W0@{i j k} (A : U0@{i j k}) (B : El0 A -> U0@{i j k})
+                      (Be : forall a0 a1 : El0 A, eq0 A A a0 a1 -> eqU0 (B a0) (B a1)) : U0@{i j k} :=
   mkU0 (extW (El0 A) (in0 A) (ext0 A)
              (fun a => El0 (B a)) (fun a => in0 (B a))
              Be (fun a => ext0 (B a))).
-Definition Quo0 (A : U0) (R : El0 A -> El0 A -> Type)
-                (Re : forall a0 a1 (ae : eq0 A A a0 a1) b0 b1 (be : eq0 A A b0 b1), (R a0 b0 <--> R a1 b1)) : U0 :=
+Definition Quo0@{i j k} (A : U0@{i j k}) (R : El0 A -> El0 A -> Type@{i})
+                        (Re : forall a0 a1 (ae : eq0 A A a0 a1) b0 b1 (be : eq0 A A b0 b1), (R a0 b0 <--> R a1 b1)) : U0@{i j k} :=
   mkU0 (extQuo (El0 A) (in0 A) (ext0 A) R Re).
 
 (* Induction principles *)

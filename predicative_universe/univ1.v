@@ -6,6 +6,7 @@
 
 Set Universe Polymorphism.
 Set Primitive Projections.
+Set Polymorphic Inductive Cumulativity.
 Require Import utils.
 Require Import univ0 univ0_lemmas.
 
@@ -98,18 +99,19 @@ Arguments mkU1 {_} {_}.
 
 Check (El1 : U1 -> Type).
 
-Definition eq1 (A B : U1) (a : El1 A) (b : El1 B) : Type :=
+Definition eq1@{i j k l} (A B : U1@{i j k l}) (a : El1 A) (b : El1 B) : Type@{j} :=
   inU1_eq (in1 A) (in1 B) a b.
 
-Definition eqU1 (A B : U1) : Type :=
-  inU1_eqU (in1 A) (in1 B).
+Definition eqU1@{i j k l} (A B : U1@{i j k l}) : Type@{k} :=
+  inU1_eqU@{i j k l} (in1 A) (in1 B).
 
 (* Constructors *)
 
-Definition emb1 : U0 -> U1 := fun A => mkU1 (extEmb1 A).
-Definition U01 : U1 := mkU1 extU01.
-Definition Prop01 : U1 := mkU1 extProp1.
-Definition Pi1 (A : U1) (B : El1 A -> U1) (Be : forall a0 a1 : El1 A, eq1 A A a0 a1 -> eqU1 (B a0) (B a1)) : U1 :=
+Definition emb1@{i j k l} : U0@{i j k} -> U1@{i j k l} := fun A => mkU1 (extEmb1 A).
+Definition U01@{i j k l} : U1@{i j k l} := mkU1 extU01.
+Definition Prop01@{i j k l} : U1@{i j k l} := mkU1 extProp1.
+Definition Pi1@{i j k l} (A : U1@{i j k l}) (B : El1 A -> U1@{i j k l})
+                         (Be : forall a0 a1 : El1 A, eq1 A A a0 a1 -> eqU1 (B a0) (B a1)) : U1@{i j k l} :=
   mkU1 (extPi1 (El1 A) (in1 A) (ext1 A)
               (fun a => El1 (B a)) (fun a => in1 (B a))
               Be (fun a => ext1 (B a))).
