@@ -646,3 +646,32 @@ Proof.
   eapply sym0. apply sym0 in ePxy1. apply sym0 in ePy.
   refine (trans0 (app1 P1 x1) (app1 P1 y1) (symU0 _ _ eP1) (app1 P0 y0) ePxy1 ePy).
 Defined.
+
+(* Truncation operator *)
+
+Definition trunc0@{i j k l} : El1 U01@{i j k l} -> El1 Prop01@{i j k l}.
+Proof.
+  exact El0.
+Defined.
+
+Definition trunc0e (A0 A1 : El1 U01) (Ae : eq1 U01 U01 A0 A1) : eq1 Prop01 Prop01 (trunc0 A0) (trunc0 A1).
+Proof.
+  split.
+  - intro a. exact (cast0 A0 A1 Ae a).
+  - intro a. exact (cast0 A1 A0 (symU0 _ _ Ae) a).
+Defined.
+
+(* Unique choice allows us to escape truncations for HProps *)
+
+Definition untrunc0@{i j k l} (A : El1 U01@{i j k l}) (HA : forall (a b : El0 A), obseq0@{i j k l} A a b)
+  : trunc0@{i j k l} A -> El0@{i j k} A.
+Proof.
+  intro a. exact a.
+Defined.
+
+Definition untrunc0e (A0 A1 : El1 U01) (Ae : eq1 U01 U01 A0 A1)
+  (HA0 : forall (a b : El0 A0), obseq0 A0 a b) (HA1 : forall (a b : El0 A1), obseq0 A1 a b)
+  (a0 : trunc0 A0) (a1 : trunc0 A1) : eq0 A0 A1 (untrunc0 A0 HA0 a0) (untrunc0 A1 HA1 a1).
+Proof.
+  refine (trans0 A0 A1 Ae A1 (cast0_eq A0 A1 Ae a0) (HA1 _ _)).
+Defined.
