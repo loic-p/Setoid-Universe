@@ -1,29 +1,25 @@
-# A Setoid Universe In Coq
+# A Universe for Proof-relevant Setoids in Coq
 
-A universe hierarchy for proof-relevant setoids, only using Coq's indexed
-inductive types.
+A new construction for a universe of setoids, only using Coq's indexed inductive
+types. The construction is agnostic regarding the nature of the setoid equality,
+which can be defined in Prop, Type or SProp.
 
--------
+Using our universe hierarchy, we can get a shallow embedding of an observational
+type theory in Coq. The precise properties that are supported by the embedded
+theory depend on the sort that has been chosen for the setoid equality:
 
-Using our universe hierarchy, we get a shallow embedding of an observational
-type theory that supports:
-- Pi-types, Sigma-types, W-types, Integers
-- Impredicative propositions
-- Equality proofs in Prop that compute
-- Propositional UIP (but not definitional UIP!)
-- Function extensionality, proposition extensionality
-- Large elimination of the accessibility predicate
-- Quotients
-
-In other words, we have the full CIC augmented with extensionality principles
-and quotients. However, eta expansion for function types only holds up to a
-propositional equality.
-
--------
-
-Alternatively, we can put the equalities in Type, which provides us with
-unique choice/function comprehension at the cost of losing impredicative
-quantification.
+|                                          | Prop          | Type          | SProp         |
+| ---------------------------------------- | ------------- | ------------- | ------------- |
+| Pi-types, Sigma-types, W-types, Integers | ✅             | ✅             | ✅             |
+| Universes                                | ✅             | ✅             | ✅             |
+| Sort of propositions                     | Impredicative | Predicative   | Impredicative |
+| Quotient types                           | ✅             | ✅             | ✅             |
+| Observational equality with typecasting  | ✅             | ✅             | ✅             |
+| UIP                                      | Propositional | Propositional | Definitional |
+| Funext, Propext                          | ✅             | ✅             | ✅             |
+| Unique choice                            | ❌             | ✅             | ❌             |
+| Large elimination of accessibility       | ✅             | ✅             | ❌             |
+| Eta expansion for functions              | Propositional | Propositional | Definitional |
 
 -------
 
