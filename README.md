@@ -24,6 +24,7 @@ theory depend on the sort that has been chosen for the setoid equality:
 
 -------
 
+The files in `impredicative_universe` use equalities in Prop, the files in `predicative_universe` use equalities in Type.
 Description of the files:
 - `utils.v` : Auxiliary definitions and lemmas
 - `univ0.v` : Definition of the lowest universe U0 and its induction principle
