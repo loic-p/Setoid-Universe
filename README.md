@@ -28,7 +28,7 @@ Description of the files:
 - `univ0.v` : Definition of the lowest universe U0 and its induction principle
 - `univ0_lemmas.v` : Reflexivity, Symmetry, Transitivity and Typecasting for the equality on U0
 - `univ1.v` : Definition of the larger universe U1 and its induction principle
-- `univ1_lemmas.v` : Reflexivity, Symmetry, Transitivity and Typecasting for the equality on U0
+- `univ1_lemmas.v` : Reflexivity, Symmetry, Transitivity and Typecasting for the equality on U1
 - `model.v` : Shallow embedding of the observational type theory
 
 -------
