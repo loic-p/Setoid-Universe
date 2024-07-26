@@ -1,3 +1,4 @@
+-R . SetoidModel
 utils.v
 univ0.v
 univ0_lemmas.v
