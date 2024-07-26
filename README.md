@@ -8,18 +8,19 @@ Using our universe hierarchy, we can get a shallow embedding of an observational
 type theory in Coq. The precise properties that are supported by the embedded
 theory depend on the sort that has been chosen for the setoid equality:
 
-|                                          | Prop          | Type          | SProp         |
-| ---------------------------------------- | ------------- | ------------- | ------------- |
-| Pi-types, Sigma-types, W-types, Integers | ✅             | ✅             | ✅             |
-| Universes                                | ✅             | ✅             | ✅             |
-| Sort of propositions                     | Impredicative | Predicative   | Impredicative |
-| Quotient types                           | ✅             | ✅             | ✅             |
-| Observational equality with typecasting  | ✅             | ✅             | ✅             |
-| UIP                                      | Propositional | Propositional | Definitional |
-| Funext, Propext                          | ✅             | ✅             | ✅             |
-| Unique choice                            | ❌             | ✅             | ❌             |
-| Large elimination of accessibility       | ✅             | ✅             | ❌             |
-| Eta expansion for functions              | Propositional | Propositional | Definitional |
+|                                          | Prop          | Type          | SProp         | Impredicative-Set |
+| ---------------------------------------- | ------------- | ------------- | ------------- | ----------------- |
+| Pi-types, Sigma-types, W-types, Integers | ✅             | ✅             | ✅             | ✅                 |
+| Universes                                | ✅             | ✅             | ✅             | ✅                 |
+| Sort of propositions                     | Impredicative | Predicative   | Impredicative | Impredicative     |
+| Quotient types                           | ✅             | ✅             | ✅             | ✅                 |
+| Observational equality with typecasting  | ✅             | ✅             | ✅             | ✅                 |
+| UIP                                      | Propositional | Propositional | Definitional  | Propositional     |
+| Funext, Propext                          | ✅             | ✅             | ✅             | ✅                 |
+| Unique choice                            | ❌             | ✅             | ❌             | ❌                 |
+| Large elimination of accessibility       | ✅             | ✅             | ❌             | ✅                 |
+| Eta expansion for functions              | Propositional | Propositional | Definitional  | Propositional     |
+| Computation of J on reflexivity          | Propositional | Definitional  | Propositional | Definitional      |
 
 -------
 
