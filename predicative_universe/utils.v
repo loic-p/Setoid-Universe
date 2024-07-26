@@ -44,11 +44,25 @@ Record and_ex@{i} (A B : Type@{i}) : Type@{i} :=
 Arguments mkAndEx {_} {_}.
 Arguments andleft {_} {_}.
 Arguments andright {_} {_}.
-Notation "A × B" := (and_ex A B) (at level 40).
+Notation "A × B" := (and_ex A B) (at level 80, right associativity).
 
 Definition bi_impl@{i} (A B : Type@{i}) : Type@{i} := (A -> B) × (B -> A).
 Notation "A <--> B" := (bi_impl A B) (at level 90).
 
+Lemma biimpl_refl (A : Type) : A <--> A.
+Proof.
+  easy.
+Defined.
+
+Lemma biimpl_sym [A B : Type] : A <--> B -> B <--> A.
+Proof.
+  now intros [ H1 H2 ].
+Defined.
+
+Lemma biimpl_trans [A B C : Type] : A <--> B -> B <--> C -> A <--> C.
+Proof.
+  intros [ H1 H2 ] [ H3 H4 ]. split ; tauto.
+Defined.
 
 (* Reflective, symmetric, transitive closure of a relation R on a setoid whose equality is eA *)
 
