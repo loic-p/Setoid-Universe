@@ -20,6 +20,7 @@ theory depend on the sort that has been chosen for the setoid equality:
 | Unique choice                            | ❌             | ✅             | ❌             | ❌                 |
 | Large elimination of accessibility       | ✅             | ✅             | ❌             | ✅                 |
 | Eta expansion for functions              | Propositional | Propositional | Definitional  | Propositional     |
+| Substitutions commuting with binders     | Propositional | Propositional | Definitoinal  | Propositional     |
 | Computation of J on reflexivity          | Propositional | Definitional  | Propositional | Definitional      |
 
 -------
