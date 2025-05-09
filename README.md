@@ -18,9 +18,12 @@ theory depend on the sort that has been chosen for the setoid equality:
 | UIP                                      | Propositional | Propositional | Definitional  | Propositional     |
 | Funext, Propext                          | ✅             | ✅             | ✅             | ✅                 |
 | Unique choice                            | ❌             | ✅             | ❌             | ❌                 |
+| Countable choice                         | ❌             | ✅             | ❌             | ❌                 |
+| Dependent choice                         | ❌             | ✅             | ❌             | ❌                 |
+| N -> N indexed choice                    | ❌             | Needs funext  | ❌             | ❌                 |
 | Large elimination of accessibility       | ✅             | ✅             | ❌             | ✅                 |
 | Eta expansion for functions              | Propositional | Propositional | Definitional  | Propositional     |
-| Substitutions commuting with binders     | Propositional | Propositional | Definitoinal  | Propositional     |
+| Substitutions commuting with binders     | Propositional | Propositional | Definitional  | Propositional     |
 | Computation of J on reflexivity          | Propositional | Definitional  | Propositional | Definitional      |
 
 -------
