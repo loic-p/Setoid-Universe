@@ -19,6 +19,9 @@ Proof.
   revert a. pattern A ; eapply U1_ind ; clear A.
   - exact refl0.
   - exact reflU0.
+  - intros A IHA P IHP Pext [ a p ]. split.
+    + exact (IHA a).
+    + exact (IHP a p).
   - intros A IHA P IHP Pext [ f fe ]. exact fe.
 Defined.
 
@@ -32,19 +35,25 @@ Definition sym1_pre (A B : U1) {a : El1 A} {b : El1 B} : eq1 A B a b <-> eq1 B A
 Proof.
   revert B a b. pattern A ; eapply U1_ind ; clear A.
   - intro A. intro B ; pattern B ; eapply U1_ind ; clear B.
-    + intros B a b. eapply sym0_pre.
-    + intros. split ; now intros [].
-    + intros. split ; now intros [].
+    2,3,4: intros ; split ; now intros [].
+    intros B a b. eapply sym0_pre.
   - intro B ; pattern B ; eapply U1_ind ; clear B.
-    + intros. split ; now intros [].
-    + intros A B. eapply symU0_pre.
-    + intros. split ; now intros [].
+    1,3,4: intros ; split ; now intros [].
+    intros A B. eapply symU0_pre.
   - intros A IHA P IHP Pe. intro B ; pattern B ; eapply U1_ind ; clear B.
-    + intros a b. split ; now intros [].
-    + intros a b. split ; now intros [].
-    + intros B _ Q _ Qe f g. split.
-      * intros e b a eba. eapply IHP. apply <- IHA in eba. exact (e a b eba).
-      * intros e a b eab. eapply IHP. apply IHA in eab. exact (e b a eab).
+    1,2,4: intros ; split ; now intros [].
+    intros B _ Q _ Qe t u. split.
+    + intros [ eap epq ]. split.
+      * apply IHA. exact eap.
+      * apply IHP. exact epq.
+    + intros [ eap epq ]. split.
+      * apply IHA. exact eap.
+      * apply IHP. exact epq.
+  - intros A IHA P IHP Pe. intro B ; pattern B ; eapply U1_ind ; clear B.
+    1,2,3: intros a b ; split ; now intros [].
+    intros B _ Q _ Qe f g. split.
+    + intros e b a eba. eapply IHP. apply <- IHA in eba. exact (e a b eba).
+    + intros e a b eab. eapply IHP. apply IHA in eab. exact (e b a eab).
 Defined.
 
 Definition sym1 (A B : U1) {a : El1 A} {b : El1 B} : eq1 A B a b -> eq1 B A b a.
@@ -56,21 +65,25 @@ Definition symU1_pre (A B : U1) : eqU1 A B <-> eqU1 B A.
 Proof.
   revert B. pattern A ; eapply U1_ind ; clear A.
   - intro A. intro B ; pattern B ; eapply U1_ind ; clear B.
-    + intro B. eapply symU0_pre.
-    + split ; now intros [].
-    + intros. split ; now intros [].
+    2,3,4: split ; now intros [].
+    intro B. eapply symU0_pre.
   - intro B ; pattern B ; eapply U1_ind ; clear B.
-    + split ; now intros [].
-    + easy.
-    + intros. split ; now intros [].
+    1,3,4: split ; now intros [].
+    easy.
   - intros A IHA P IHP Pe. intro B ; pattern B ; eapply U1_ind ; clear B.
-    + split ; now intros [].
-    + split ; now intros [].
-    + intros B _ Q _ Qe. split.
-      * intros [ eAB ePQ ]. apply IHA in eAB. econstructor.
-        exact eAB. intros a b eab. eapply IHP. eapply ePQ. eapply sym1. exact eab.
-      * intros [ eAB ePQ ]. apply IHA in eAB. econstructor.
-        exact eAB. intros a b eab. eapply IHP. eapply ePQ. eapply sym1. exact eab.
+    1,2,4: split ; now intros [].
+    intros B _ Q _ Qe. split.
+    + intros [ eAB ePQ ]. apply IHA in eAB. econstructor.
+      exact eAB. intros a b eab. eapply IHP. eapply ePQ. eapply sym1. exact eab.
+    + intros [ eAB ePQ ]. apply IHA in eAB. econstructor.
+      exact eAB. intros a b eab. eapply IHP. eapply ePQ. eapply sym1. exact eab.
+  - intros A IHA P IHP Pe. intro B ; pattern B ; eapply U1_ind ; clear B.
+    1,2,3: split ; now intros [].
+    intros B _ Q _ Qe. split.
+    + intros [ eAB ePQ ]. apply IHA in eAB. econstructor.
+      exact eAB. intros a b eab. eapply IHP. eapply ePQ. eapply sym1. exact eab.
+    + intros [ eAB ePQ ]. apply IHA in eAB. econstructor.
+      exact eAB. intros a b eab. eapply IHP. eapply ePQ. eapply sym1. exact eab.
 Defined.
 
 Definition symU1 (A B : U1) : eqU1 A B -> eqU1 B A.
@@ -99,28 +112,43 @@ Proof.
     + exact (cast0 A B eAB).
     + exact (castb (cast_lemmas A B eAB)).
     + intro C. pattern C ; eapply U1_ind ; clear C.
-      * intros C a b c. eapply (trans0 A B eAB).
-      * easy.
-      * easy.
+      2,3,4: easy.
+      intros C a b c. eapply (trans0 A B eAB).
     + intro C. pattern C ; eapply U1_ind ; clear C.
-      * intros C a b c. eapply (transb (cast_lemmas A B eAB)).
-      * easy.
-      * easy.
+      2,3,4: easy.
+      intros C a b c. eapply (transb (cast_lemmas A B eAB)).
     + intro a. eapply (cast0_eq A B eAB).
     + intro b. eapply (castb_eq (cast_lemmas A B eAB)).
   - unshelve econstructor.
     + exact (fun P => P).
     + exact (fun P => P).
     + intro C. pattern C ; eapply U1_ind ; clear C.
-      * easy.
-      * intros A B C. eapply transU0.
-      * easy.
+      1,3,4: easy.
+      intros A B C. eapply transU0.
     + intro C. pattern C ; eapply U1_ind ; clear C.
-      * easy.
-      * intros A B C. eapply transU0.
-      * easy.
+      1,3,4: easy.
+      intros A B C. eapply transU0.
     + eapply reflU0.
     + eapply reflU0.
+  - intros A B eAB IHA P Q ePQ IHP Pe Qe. unshelve econstructor.
+    + intros [ a p ]. econstructor.
+      exact (castf1 (IHP _ _ (castf1_eq IHA a)) p).
+    + intros [ b q ]. econstructor.
+      exact (castb1 (IHP _ _ (sym1 _ _ (castb1_eq IHA b))) q).
+    + intro C. pattern C ; eapply U1_ind ; clear C ; try easy.
+      intros C _ R _ Re [ a p ] [ b q ] [ c r ] [ eab epq ] [ ebc eqr ]. econstructor.
+      * exact (transf1 IHA C eab ebc).
+      * exact (transf1 (IHP a b eab) (R c) epq eqr).
+    + intro C. pattern C ; eapply U1_ind ; clear C ; try easy.
+      intros C _ R _ Re [ a p ] [ b q ] [ c r ] [ eba eqp ] [ eac epr ]. econstructor.
+      * exact (transb1 IHA C eba eac).
+      * exact (transb1 (IHP a b (sym1 _ _ eba)) (R c) eqp epr).
+    + intros [ a p ]. econstructor.
+      * exact (castf1_eq IHA a).
+      * exact (castf1_eq (IHP _ _ (castf1_eq IHA a)) p).
+    + intros [ b q ]. econstructor.
+      * exact (castb1_eq IHA b).
+      * exact (castb1_eq (IHP _ _ (sym1 _ _ (castb1_eq IHA b))) q).
   - intros A B eAB IHA P Q ePQ IHP Pe Qe. unshelve econstructor.
     + intros [ f fe ]. change (forall a0 a1, eq1 A A a0 a1 -> eq1 (P a0) (P a1) (f a0) (f a1)) in fe. unshelve econstructor.
       * refine (fun b => castf1 (IHP _ _ (sym1 B A (castb1_eq IHA b))) (f (castb1 IHA b))).
@@ -143,21 +171,19 @@ Proof.
         pose proof (transf1 (IHP _ _ (castf1_eq IHA a1)) (Q (castf1 IHA a0)) (sym1 _ _ e4) (sym1 _ _ e2)) as e5.
         exact (sym1 _ _ (transf1 (IHP _ _ (sym1 B A e0)) (P a0) e5 e3)).
     + intro C. pattern C ; eapply U1_ind ; clear C.
-      * easy.
-      * easy.
-      * intros C _ R _ Re f g h efg egh a c eac. change (eq1 A C a c) in eac.
-        set (b := castf1 IHA a).
-        pose proof (castf1_eq IHA a) as eab. change (eq1 A B a b) in eab.
-        pose proof (transb1 IHA C (sym1 A B eab) eac) as ebc.
-        exact (transf1 (IHP a b eab) (R c) (efg _ _ eab) (egh _ _ ebc)).
+      1,2,3: easy.
+      intros C _ R _ Re f g h efg egh a c eac. change (eq1 A C a c) in eac.
+      set (b := castf1 IHA a).
+      pose proof (castf1_eq IHA a) as eab. change (eq1 A B a b) in eab.
+      pose proof (transb1 IHA C (sym1 A B eab) eac) as ebc.
+      exact (transf1 (IHP a b eab) (R c) (efg _ _ eab) (egh _ _ ebc)).
     + intro C. pattern C ; eapply U1_ind ; clear C.
-      * easy.
-      * easy.
-      * intros C _ R _ Re f g h egf efh b c ebc. change (eq1 B C b c) in ebc.
-        set (a := castb1 IHA b).
-        pose proof (castb1_eq IHA b) as eba. change (eq1 B A b a) in eba.
-        pose proof (transf1 IHA C (sym1 B A eba) ebc) as eac.
-        exact (transb1 (IHP a b (sym1 B A eba)) (R c) (egf _ _ eba) (efh _ _ eac)).
+      1,2,3: easy.
+      intros C _ R _ Re f g h egf efh b c ebc. change (eq1 B C b c) in ebc.
+      set (a := castb1 IHA b).
+      pose proof (castb1_eq IHA b) as eba. change (eq1 B A b a) in eba.
+      pose proof (transf1 IHA C (sym1 B A eba) ebc) as eac.
+      exact (transb1 (IHP a b (sym1 B A eba)) (R c) (egf _ _ eba) (efh _ _ eac)).
     + intros [ f fe ] a b eab. change (eq1 A B a b) in eab.
       pose proof (transf1 IHA A eab (castb1_eq IHA b)) as e0.
       pose proof (fe _ _ e0) as e1. change (eq1 (P a) (P (castb1 IHA b)) (f a) (f (castb1 IHA b))) in e1.
@@ -193,18 +219,25 @@ Proof.
   intro eAB. revert C. change ((fun A B eAB => forall C : U1, eqU1 B C -> eqU1 A C) A B eAB).
   eapply U1_rect2 ; clear eAB B A.
   - intros A B eAB C. pattern C ; eapply U1_ind ; clear C.
-    + intros C eBC. apply (transU0 eAB eBC).
-    + easy.
-    + easy.
+    2,3,4: easy.
+    intros C eBC. apply (transU0 eAB eBC).
   - easy.
   - intros A B eAB IHA P Q ePQ IHP Pe Qe. intro C.
     pattern C ; eapply U1_ind ; clear C.
-    + easy.
-    + easy.
-    + intros C _ R _ Re [ eBC eQR ]. unshelve econstructor.
-      * exact (IHA C eBC).
-      * intros a c eac. set (b := cast1 A B eAB a).
-        pose proof (cast1_eq A B eAB a) as eab. change (eq1 A B a b) in eab.
-        pose proof (trans1 B A (symU1 A B eAB) C (sym1 A B eab) eac) as ebc.
-        exact (IHP a b eab (R c) (eQR b c ebc)).
+    1,2,4: easy.
+    intros C _ R _ Re [ eBC eQR ]. unshelve econstructor.
+    + exact (IHA C eBC).
+    + intros a c eac. set (b := cast1 A B eAB a).
+      pose proof (cast1_eq A B eAB a) as eab. change (eq1 A B a b) in eab.
+      pose proof (trans1 B A (symU1 A B eAB) C (sym1 A B eab) eac) as ebc.
+      exact (IHP a b eab (R c) (eQR b c ebc)).
+  - intros A B eAB IHA P Q ePQ IHP Pe Qe. intro C.
+    pattern C ; eapply U1_ind ; clear C.
+    1,2,3: easy.
+    intros C _ R _ Re [ eBC eQR ]. unshelve econstructor.
+    + exact (IHA C eBC).
+    + intros a c eac. set (b := cast1 A B eAB a).
+      pose proof (cast1_eq A B eAB a) as eab. change (eq1 A B a b) in eab.
+      pose proof (trans1 B A (symU1 A B eAB) C (sym1 A B eab) eac) as ebc.
+      exact (IHP a b eab (R c) (eQR b c ebc)).
 Defined.

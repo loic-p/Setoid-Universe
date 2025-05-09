@@ -45,6 +45,7 @@ Inductive inU0@{i j} : Type@{i} -> Type@{j} :=
                 (R : A -> A -> Prop),
     inU0 A.
 
+(* This definition ignores all of Aeq, Peq, or the proofs of Piext/Wext *)
 Definition inU0_eq@{i j} {A : Type@{i}} (Au : inU0@{i j} A) {B : Type@{i}} (Bu : inU0@{i j} B) (a : A) (b : B) : Prop.
 Proof.
   revert B Bu a b. induction Au as [ P | | | A Au IHA P Pu IHP | A Au IHA Aeq P Pu IHP Peq | A Au IHA Aeq P Pu IHP Peq | A Au IHA Aeq R ].
@@ -63,17 +64,18 @@ Proof.
     exact (and_ex (IHA B Bu a b) (IHP a (Q b) (Qu b) p q)).
   - intros _ [ | | | | B Bu Beq Q Qu Qeq | | ].
     1,2,3,4,6,7: exact (fun _ _ => False).
-    intros [ f fe ] [ g ge ].
+    intros [ f _ ] [ g _ ].
     exact (forall a b, IHA B Bu a b -> IHP a (Q b) (Qu b) (f a) (g b)).
   - intros _ [ | | | | | B Bu Beq Q Qu Qeq | ].
     1,2,3,4,5,7: exact (fun _ _ => False).
-    intros [ f fe ] [ g ge ].
+    intros [ f _ ] [ g _ ].
     exact (Weq (fun a b => IHA B Bu a b) (fun a b p q => IHP a (Q b) (Qu b) p q) f g).
   - intros _ [ | | | | | | B Bu Beq S ].
     1,2,3,4,5,6: exact (fun _ _ => False).
     exact (fun a b => exists (a1 : A) (b1 : B), closure Aeq R a a1 /\ IHA B Bu a1 b1 /\ closure Beq S b1 b).
 Defined.
 
+(* Likewise, this definition does not care about Aeq, Peq, proofs of Pi_ext/Wext *)
 Definition inU0_eqU@{i j} {A : Type@{i}} (Au : inU0@{i j} A) {B : Type@{i}} (Bu : inU0@{i j} B) : Prop.
 Proof.
   revert B Bu. induction Au as [ P | | | A Au IHA P Pu IHP | A Au IHA Aeq P Pu IHP Peq | A Au IHA Aeq P Pu IHP Peq | A Au IHA Aeq R ].
