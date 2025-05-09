@@ -20,7 +20,7 @@ theory depend on the sort that has been chosen for the setoid equality:
 | Unique choice                            | ❌             | ✅             | ❌             | ❌                 |
 | Countable choice                         | ❌             | ✅             | ❌             | ❌                 |
 | Dependent choice                         | ❌             | ✅             | ❌             | ❌                 |
-| N -> N indexed choice                    | ❌             | Needs funext  | ❌             | ❌                 |
+| N -> N indexed choice                    | ❌             | Needs meta-funext  | ❌             | ❌                 |
 | Large elimination of accessibility       | ✅             | ✅             | ❌             | ✅                 |
 | Eta expansion for functions              | Propositional | Propositional | Definitional  | Propositional     |
 | Substitutions commuting with binders     | Propositional | Propositional | Definitional  | Propositional     |
