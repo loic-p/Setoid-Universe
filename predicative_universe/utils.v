@@ -100,6 +100,115 @@ Proof.
   - intros l Hl. inversion Hl as [|? l0]. constructor. now apply IHnateq.
 Defined.
 
+Theorem nateq_eq : forall {n m}, nateq n m -> n = m.
+Proof.
+  intros. induction X.
+  - easy.
+  - eapply f_equal. exact IHX.
+Defined.
+
+Theorem suc_inj : forall {n m}, suc n = suc m -> n = m.
+Proof.
+  intros. inversion H. easy.
+Defined.
+
+Theorem eq_nateq : forall {n m}, n = m -> nateq n m.
+Proof.
+  intro n. induction n.
+  - intro m. induction m.
+    + intros. econstructor.
+    + easy.
+  - intro m. destruct m.
+    + easy.
+    + intro H. apply eqsuc. apply IHn. apply suc_inj. exact H.
+Defined.
+
+Theorem nateq_iso : forall {n m} (e : nateq n m), e = eq_nateq (nateq_eq e).
+Proof.
+  intros n m e. induction e.
+  - reflexivity.
+  - change (eqsuc n m e = eq_nateq (f_equal suc (nateq_eq e))).
+    change (eqsuc n m e = eqsuc n m (eq_nateq (suc_inj (f_equal suc (nateq_eq e))))).
+    apply (f_equal (eqsuc n m)). refine (eq_trans IHe _).
+    apply (f_equal eq_nateq).
+    assert (forall n m (e : n = m), e = suc_inj (f_equal suc e)).
+    { clear n m e IHe. intros n m e. destruct e. reflexivity. }
+    eapply H.
+Defined.
+
+Definition nateq2 : nat -> nat -> Type.
+Proof.
+  intro n. induction n.
+  - intro m. destruct m.
+    + exact unit.
+    + exact empty.
+  - intro m. destruct m.
+    + exact empty.
+    + exact (IHn m).
+Defined.
+
+Definition nateq2_refl : forall (n : nat), nateq2 n n.
+Proof.
+  intro n. induction n.
+  - exact tt.
+  - exact IHn.
+Defined.
+
+Definition eq_nateq2 : forall {n m : nat}, n = m -> nateq2 n m.
+Proof.
+  intros n m e. destruct e. apply nateq2_refl.
+Defined.
+
+Definition nateq2_eq : forall {n m : nat}, nateq2 n m -> n = m.
+Proof.
+  intro n.
+  induction n.
+  - intro m ; destruct m.
+    + intros. reflexivity.
+    + intros. destruct X.
+  - intro m ; destruct m.
+    + intros. destruct X.
+    + intros. apply (IHn m) in X.
+      apply (f_equal suc). exact X.
+Defined.
+
+Definition nateq2_iso : forall (n m : nat) (e : n = m), e = nateq2_eq (eq_nateq2 e).
+Proof.
+  intros n m e. destruct e.
+  simpl. induction n.
+  - reflexivity.
+  - change (eq_refl = f_equal suc (nateq2_eq (nateq2_refl n))).
+    rewrite <- IHn. reflexivity.
+Defined.
+
+Definition nateq2_hprop : forall {n m : nat} (e1 e2 : nateq2 n m), e1 = e2.
+Proof.
+  intro n. induction n.
+  - destruct m.
+    + destruct e1 ; destruct e2 ; easy.
+    + easy.
+  - destruct m.
+    + easy.
+    + apply IHn.
+Defined.
+
+Definition eq_hprop : forall {n m : nat} (e1 e2 : n = m), e1 = e2.
+Proof.
+  intros n m e1 e2.
+  rewrite (nateq2_iso n m e1).
+  rewrite (nateq2_hprop (eq_nateq2 e1) (eq_nateq2 e2)).
+  rewrite <- (nateq2_iso n m e2).
+  reflexivity.
+Defined.
+
+Definition nateq_hprop : forall {n m : nat} (e1 e2 : nateq n m), e1 = e2.
+Proof.
+  intros n m e1 e2.
+  rewrite (nateq_iso e1).
+  rewrite (eq_hprop (nateq_eq e1) (nateq_eq e2)).
+  rewrite <- (nateq_iso e2).
+  reflexivity.
+Defined.
 
 (* Setoid equality on W types *)
 (* The equality is parameterised by a setoid equality on A and B *)

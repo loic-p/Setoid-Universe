@@ -741,3 +741,65 @@ Definition untrunc0e (A0 A1 : El1 U01) (Ae : eq1 U01 U01 A0 A1)
 Proof.
   refine (trans0 A0 A1 Ae A1 (cast0_eq A0 A1 Ae a0) (HA1 _ _)).
 Defined.
+
+(* Countable choice works because the setoid equality on N is the same as the meta equality *)
+
+Definition countable_choice (P : El1 (arr1 (emb1 nat0) U01))
+  (H : forall (n : El0 nat0), trunc0 (app1 P n))
+  : trunc0 (pi0 nat0 P).
+Proof.
+  unshelve econstructor.
+  - intro n. exact (H n).
+  - intros n m e. change (nateq n m) in e. apply nateq_eq in e. rewrite e.
+    apply refl0.
+Defined.
+
+(* For the same reason, dependent choice is also fine *)
+
+Definition dependent_choice (A : El1 U01)
+  (a : El0 A)
+  (R : El1 (arr1 (emb1 A) (arr1 (emb1 A) Prop01)))
+  (H : forall (a : El0 A), trunc0 (sigma0 A (mkPair (fun b => emb0 (fst (fst R a) b))
+                                                    (fun a0 a1 ae => mkAndEx (fun H => andleft (snd R a a (refl0 A a) a0 a1 ae) H)
+                                                                             (fun H => andright (snd R a a (refl0 A a) a0 a1 ae) H)))))
+  : trunc0 (sigma0 (arr0 nat0 A)
+              (mkPair (fun f => emb0 (forall (n : nat), fst (fst R (fst f n)) (fst f (suc n))))
+                      (fun f0 f1 fe => mkAndEx (fun H n => andleft (snd R (fst f0 n) (fst f1 n) (fe n n (nateq_refl n))
+                                                                          (fst f0 (suc n)) (fst f1 (suc n)) (fe (suc n) (suc n) (nateq_refl (suc n)))) (H n))
+                                               (fun H n => andright (snd R (fst f0 n) (fst f1 n) (fe n n (nateq_refl n))
+                                                                           (fst f0 (suc n)) (fst f1 (suc n)) (fe (suc n) (suc n) (nateq_refl (suc n)))) (H n))))).
+Proof.
+  unshelve econstructor.
+  - unshelve econstructor.
+    + intro n. change (El0 A). induction n.
+      * exact a.
+      * exact (fst (H IHn)).
+    + intros n m enm. apply nateq_eq in enm. destruct enm. apply refl0.
+  - cbn. intro n.
+    exact (snd (H (nat_rect (fun _ => El0 A) a (fun _ n0 => fst (H n0)) n))).
+Defined.
+
+(* (N -> N) indexed choice works if we have funext in the meta *)
+
+Definition funext_dep_type : Type := forall (A : Type) (B : A -> Type) (f g : forall a : A, B a) (e : forall a, f a = g a), f = g.
+
+Definition continuum_choice (funext : funext_dep_type)
+  (P : El1 (arr1 (emb1 (arr0 nat0 nat0)) U01))
+  (H : forall (f : El0 (arr0 nat0 nat0)), trunc0 (app1 P f))
+  : trunc0 (pi0 (arr0 nat0 nat0) P).
+Proof.
+  unshelve econstructor.
+  - intro f. exact (H f).
+  - intros f g e.
+    destruct f as [f Hf]. change (nat -> nat) in f. cbn in Hf.
+    destruct g as [g Hg]. change (nat -> nat) in g. cbn in Hg.
+    cbn in e.
+    assert (f = g).
+    { eapply funext. intro n. eapply nateq_eq. apply e. apply nateq_refl. }
+    destruct H0.
+    assert (Hf = Hg).
+    { eapply funext. intro n. eapply funext. intro m. eapply funext. intro enm.
+      apply nateq_hprop. }
+    destruct H0.
+    apply refl0.
+Defined.
