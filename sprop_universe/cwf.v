@@ -301,7 +301,8 @@ Definition var0 {Γ : Con} (A : Ty Γ) : Tm (Γ ▸ A) (A [wk A]t) := Var0 (El A
 
 Definition sgSub {Γ : Con} {A : Ty Γ} (t : Tm Γ A) : Sub Γ (Γ ▸ A) := subExt (El A) (idSub Γ) t.
 
-(* Dependent products of small types *)
+(* Dependent products of small types.
+   Note that El (Π A B) ≠ ΠΠ (El A) (El B). We could probably enforce that equality if we used a recursive embedding... *)
 
 Definition Π {Γ : Con} (A : Ty Γ) (B : Ty (Γ ▸ A)) : Ty Γ.
 Proof.
@@ -655,5 +656,118 @@ Proof.
   reflexivity.
 Qed.
 
-(* TODO: Observational equality with cast, W types and quotients.
-         See model.v for a somewhat less careful version. *)
+(* Observational equality *)
+
+Definition obseq {Γ : Con} (A : TY Γ) (x y : TM Γ A) : Tm Γ (Ω Γ).
+Proof.
+  unshelve econstructor.
+  - exact (fun γ => eq1 (fsts A γ) (fsts A γ) (fsts x γ) (fsts y γ)).
+  - intros γ0 γ1 γe. constructor.
+    + intro e0. refine (trans1 (fsts A γ1) (fsts A γ0) (symU1 _ _ (snds A γ0 γ1 γe)) (fsts A γ1) (sym1 _ _ (snds x γ0 γ1 γe)) _).
+      refine (trans1 (fsts A γ0) (fsts A γ0) (reflU1 (fsts A γ0)) (fsts A γ1) e0 _).
+      exact (snds y γ0 γ1 γe).
+    + intro e0. refine (trans1 (fsts A γ0) (fsts A γ1) (snds A γ0 γ1 γe) (fsts A γ0) (snds x γ0 γ1 γe) _).
+      refine (trans1 (fsts A γ1) (fsts A γ1) (reflU1 (fsts A γ1)) (fsts A γ0) e0 _).
+      exact (sym1 _ _ (snds y γ0 γ1 γe)).
+Defined.
+
+Lemma substObseq {Γ Δ : Con} (A : TY Γ) (x y : TM Γ A) (σ : Sub Δ Γ) :
+  (obseq A x y) [σ]t = obseq (A [σ]T) (x [σ]t) (y [σ]t).
+Proof.
+  reflexivity.
+Qed.
+
+(* Reflexivity *)
+
+Definition obseq_refl {Γ : Con} (A : TY Γ) (x : TM Γ A) : Tm Γ (Prf (obseq A x x)).
+Proof.
+  unshelve econstructor.
+  - exact (fun γ => to_set_intro _ (refl1 (fsts A γ) (fsts x γ))).
+  - exact (fun γ0 γ1 γe => stt).
+Defined.
+
+Lemma substObseq_refl {Γ Δ : Con} (A : TY Γ) (x : TM Γ A) (σ : Sub Δ Γ) :
+  (obseq_refl A x) [σ]t = obseq_refl (A [σ]T) (x [σ]t).
+Proof.
+  reflexivity.
+Qed.
+
+(* Type coercion operator *)
+
+Definition cast {Γ : Con} (A B : Ty Γ) (e : Tm Γ (Prf (obseq (U Γ) A B))) (a : Tm Γ A) : Tm Γ B.
+Proof.
+  unshelve econstructor.
+  - refine (fun γ => cast0 (fsts A γ) (fsts B γ) (to_set_esc _ (fsts e γ)) (fsts a γ)).
+  - intros γ0 γ1 γe.
+    refine (trans0 (fsts B γ0) (fsts A γ0) (symU0 _ _ (to_set_esc _ (fsts e γ0))) (fsts B γ1)
+                   (sym0 _ _ (cast0_eq (fsts A γ0) (fsts B γ0) (to_set_esc _ (fsts e γ0)) (fsts a γ0))) _).
+    refine (trans0 (fsts A γ0) (fsts A γ1) (snds A γ0 γ1 γe) (fsts B γ1) (snds a γ0 γ1 γe) _).
+    exact (cast0_eq (fsts A γ1) (fsts B γ1) (to_set_esc _ (fsts e γ1)) (fsts a γ1)).
+Defined.
+
+Lemma substCast {Γ Δ : Con} (A B : Ty Γ) (e : Tm Γ (Prf (obseq (U Γ) A B))) (a : Tm Γ A) (σ : Sub Δ Γ) :
+  (cast A B e a) [σ]t = cast (A [σ]t) (B [σ]t) (e [σ]t) (a [σ]t).
+Proof.
+  reflexivity.
+Qed.
+
+(* Cast on reflexivity *)
+
+Definition castrefl {Γ : Con} (A : Ty Γ) (a : Tm Γ A) : Tm Γ (Prf (obseq (El A) a (cast A A (obseq_refl (U Γ) A) a))).
+Proof.
+  unshelve econstructor.
+  - exact (fun γ => to_set_intro _ (cast0_eq (fsts A γ) (fsts A γ) (reflU0 (fsts A γ)) (fsts a γ))).
+  - exact (fun γ0 γ1 γe => stt).
+Defined.
+
+Lemma substCastrefl {Γ Δ : Con} (A : Ty Γ) (a : Tm Γ A) (σ : Sub Δ Γ) : (castrefl A a) [σ]t = castrefl (A [σ]t) (a [σ]t).
+Proof.
+  reflexivity.
+Qed.
+
+(* Properties of the equality: symmetry, transitivity, function congruence *)
+
+Definition sym {Γ : Con} (A : TY Γ) (x y : TM Γ A) (e : Tm Γ (Prf (obseq A x y))) : Tm Γ (Prf (obseq A y x)).
+Proof.
+  unshelve econstructor.
+  - exact (fun γ => to_set_intro _ (sym1 (fsts A γ) (fsts A γ) (to_set_esc _ (fsts e γ)))).
+  - exact (fun γ0 γ1 γe => stt).
+Defined.
+
+Lemma substSym {Γ Δ : Con} (A : TY Γ) (x y : TM Γ A) (e : Tm Γ (Prf (obseq A x y))) (σ : Sub Δ Γ) :
+  (sym A x y e) [σ]t = sym (A [σ]T) (x [σ]t) (y [σ]t) (e [σ]t).
+Proof.
+  reflexivity.
+Qed.
+
+Definition trans {Γ : Con} (A : TY Γ) (x y z : TM Γ A) (e1 : Tm Γ (Prf (obseq A x y))) (e2 : Tm Γ (Prf (obseq A y z))) :
+  Tm Γ (Prf (obseq A x z)).
+Proof.
+  unshelve econstructor.
+  - exact (fun γ => to_set_intro _ (trans1 (fsts A γ) (fsts A γ) (reflU1 (fsts A γ)) (fsts A γ)
+                                           (to_set_esc _ (fsts e1 γ)) (to_set_esc _ (fsts e2 γ)))).
+  - exact (fun γ0 γ1 γe => stt).
+Defined.
+
+Lemma substTrans {Γ Δ : Con} (A : TY Γ) (x y z : TM Γ A) (e1 : Tm Γ (Prf (obseq A x y))) (e2 : Tm Γ (Prf (obseq A y z)))
+  (σ : Sub Δ Γ) : (trans A x y z e1 e2) [σ]t = trans (A [σ]T) (x [σ]t) (y [σ]t) (z [σ]t) (e1 [σ]t) (e2 [σ]t).
+Proof.
+  reflexivity.
+Qed.
+
+Definition cong {Γ : Con} (A B : TY Γ) (f : TM Γ (ARR A B)) (x y : TM Γ A) (e : Tm Γ (Prf (obseq A x y))) :
+  Tm Γ (Prf (obseq B (APP' A B f x) (APP' A B f y))).
+Proof.
+  unshelve econstructor.
+  - exact (fun γ => to_set_intro _ (snds (fsts f γ) (fsts x γ) (fsts y γ) (to_set_esc _ (fsts e γ)))).
+  - exact (fun γ0 γ1 γe => stt).
+Defined.
+
+Lemma substCong {Γ Δ : Con} (A B : TY Γ) (f : TM Γ (ARR A B)) (x y : TM Γ A) (e : Tm Γ (Prf (obseq A x y))) (σ : Sub Δ Γ) :
+  (cong A B f x y e) [σ]t = cong (A [σ]T) (B [σ]T) (f [σ]t) (x [σ]t) (y [σ]t) (e [σ]t).
+Proof.
+  reflexivity.
+Qed.
+
+(* TODO: funext and propext *)
+(* TODO: W types and quotients. See model.v for a somewhat less careful version. *)
