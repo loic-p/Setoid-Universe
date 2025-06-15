@@ -95,6 +95,11 @@ intros [f s]. exact s. Defined.
 Inductive to_set (A : SProp) : Set :=
 | to_set_intro : forall (a : A) , to_set A.
 
+Definition to_set_esc (A : SProp) : to_set A -> A.
+Proof.
+  intro a. destruct a. exact a.
+Defined.
+
 Inductive sFalse : SProp :=.
 Inductive sTrue : SProp := stt : sTrue.
 

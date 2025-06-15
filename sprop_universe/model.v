@@ -2,7 +2,7 @@
 (* A Universe for Proof-Relevant Setoids *)
 (* ************************************* *)
 
-(* This file contains the definition of our setoid model as a translation from CIC to CIC *)
+(* This file contains the bricks of our setoid model *)
 
 Set Universe Polymorphism.
 Set Primitive Projections.
@@ -10,28 +10,9 @@ Require Import utils.
 Require Import univ0 univ0_lemmas.
 Require Import univ1 univ1_lemmas.
 
-(* A context Gamma is an element of U1, and a dependent type over Gamma is an object of `arr1 Gamma U01`
-   In other words, a pair of
-   - a map `A : Gamma -> U01`
-   - a proof of extensionality `Ae : gamma0 ~ gamma1 -> A gamma0 ~ A gamma1`
-
-   Then given a dependent type A over Gamma, a term of type A is an object of `pi1 Gamma (fun gamma => A gamma) _`
-   In other words, a pair of
-   - a dependent map `t : forall gamma, A gamma`
-   - a proof of extensionality `te : gamma0 ~ gamma1 -> t gamma0 ~ t gamma1`*)
-
-
-(* U01 is the code for U0 in U1 *)
-
-Check (U01 : U1).
-Check (eq_refl : El1 U01 = U0).
-
-
-(* Non-dependent functions in the higher universe
-   Unfortunately, eta-expansion only holds up to a propositional equality *)
+(* Nondependent functions in the upper universe *)
 
 Definition arr1 (A B : U1) : U1 := Pi1 A (fun _ => B) (fun _ _ _ => reflU1 B).
-
 Definition arr1e {A0 A1 : U1} (Ae : eqU1 A0 A1) {B0 B1 : U1} (Be : eqU1 B0 B1) : eqU1 (arr1 A0 B0) (arr1 A1 B1).
 Proof.
   unshelve econstructor.
@@ -66,9 +47,7 @@ Proof.
   exact te.
 Defined.
 
-
-(* Dependent functions in the lower universe
-   Unfortunately, eta-expansion only holds up to a propositional equality *)
+(* Dependent functions in the lower universe *)
 
 Definition pi0 (A : El1 U01) (P : El1 (arr1 (emb1 A) U01)) : El1 U01.
 Proof.
@@ -131,17 +110,6 @@ Definition beta0 (A : El1 U01) (P : El1 (arr1 (emb1 A) U01))
 Proof.
   reflexivity.
 Defined.
-
-(* Definition beta0e {A0 A1 : El1 U01} (Ae : eqU0 A0 A1) *)
-(*   {P0 : El1 (arr1 (emb1 A0) U01)} {P1 : El1 (arr1 (emb1 A1) U01)} (Pe : eq1 (arr1 (emb1 A0) U01) (arr1 (emb1 A1) U01) P0 P1) *)
-(*   {t0 : forall a : El0 A0, El0 (app1 P0 a)} (t0e : forall a0 a1 (ae : eq0 A0 A0 a0 a1), eq0 (app1 P0 a0) (app1 P0 a1) (t0 a0) (t0 a1)) *)
-(*   {t1 : forall a : El0 A1, El0 (app1 P1 a)} (t1e : forall a0 a1 (ae : eq0 A1 A1 a0 a1), eq0 (app1 P1 a0) (app1 P1 a1) (t1 a0) (t1 a1)) *)
-(*   (te : forall a0 a1 (ae : eq0 A0 A1 a0 a1), eq0 (app1 P0 a0) (app1 P1 a1) (t0 a0) (t1 a1)) *)
-(*   (a0 : El0 A0) (a1 : El0 A1) (ae : eq0 A0 A1 a0 a1) : app0e Ae Pe (lam0e Ae Pe t0e t1e te) ae = te _ _ ae. *)
-(* Proof. *)
-(*   reflexivity.  *)
-(* Defined. *)
-
 
 (* Sigma types
    The beta and eta equalities are definitionally true *)
