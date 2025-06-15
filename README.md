@@ -18,24 +18,24 @@ theory depend on the sort that has been chosen for the setoid equality:
 | UIP                                      | Propositional | Propositional | Definitional  | Propositional     |
 | Funext, Propext                          | ✅             | ✅             | ✅             | ✅                 |
 | Unique choice                            | ❌             | ✅             | ❌             | ❌                 |
-| Countable choice                         | ❌             | ✅             | ❌             | ❌                 |
-| Dependent choice                         | ❌             | ✅             | ❌             | ❌                 |
+| Countable/Dependent choice               | ❌             | ✅             | ❌             | ❌                 |
 | N -> N indexed choice                    | ❌             | Needs meta-funext  | ❌             | ❌                 |
 | Large elimination of accessibility       | ✅             | ✅             | ❌             | ✅                 |
 | Eta expansion for functions              | Propositional | Propositional | Definitional  | Propositional     |
 | Substitutions commuting with binders     | Propositional | Propositional | Definitional  | Propositional     |
-| Computation of J on reflexivity          | Propositional | Definitional  | Propositional | Definitional      |
 
 -------
 
-The files in `impredicative_universe` use equalities in Prop, the files in `predicative_universe` use equalities in Type.
+The files in `impredicative_universe` use equalities in Prop, the files in `predicative_universe` use equalities in Type,
+and the files in `sprop_universe` use equalities in SProp.
 Description of the files:
 - `utils.v` : Auxiliary definitions and lemmas
 - `univ0.v` : Definition of the lowest universe U0 and its induction principle
 - `univ0_lemmas.v` : Reflexivity, Symmetry, Transitivity and Typecasting for the equality on U0
 - `univ1.v` : Definition of the larger universe U1 and its induction principle
 - `univ1_lemmas.v` : Reflexivity, Symmetry, Transitivity and Typecasting for the equality on U1
-- `model.v` : Shallow embedding of the observational type theory
+- `model.v` : Embedding of the observational type theory (somewhat sketchy because of the missing definitional equalities)
+- `cwf.v` : Careful embedding of the observational type theory (only for the SProp version)
 
 -------
 
