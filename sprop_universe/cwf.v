@@ -587,15 +587,15 @@ Qed.
 
 (* Large elimination of False *)
 
-Definition efq {Γ : Con} (A : Ty Γ) (abs : Tm Γ (Prf (false Γ))) : Tm Γ A.
+Definition efq {Γ : Con} (A : TY Γ) (abs : Tm Γ (Prf (false Γ))) : TM Γ A.
 Proof.
   unshelve econstructor.
-  - exact (fun γ => sFalse_rect (fun _ => El0 (fsts A γ)) (to_set_esc sFalse (fsts abs γ))).
+  - exact (fun γ => sFalse_rect (fun _ => El1 (fsts A γ)) (to_set_esc sFalse (fsts abs γ))).
   - refine (fun γ0 γ1 γe => _). destruct (fsts abs γ0). destruct a.
 Defined.
 
-Lemma substEfq {Γ Δ : Con} (A : Ty Γ) (abs : Tm Γ (Prf (false Γ))) (σ : Sub Δ Γ) :
-  (efq A abs) [σ]t = efq (A [σ]t) (abs[σ]t).
+Lemma substEfq {Γ Δ : Con} (A : TY Γ) (abs : Tm Γ (Prf (false Γ))) (σ : Sub Δ Γ) :
+  (efq A abs) [σ]t = efq (A [σ]T) (abs[σ]t).
 Proof.
   reflexivity.
 Qed.
@@ -652,6 +652,40 @@ Defined.
 
 Lemma substForall_app {Γ Δ : Con} (A : Ty Γ) (P : Tm (Γ ▸ A) (Ω (Γ ▸ A))) (t : Tm Γ (Prf (for_all A P))) (u : Tm Γ A) (σ : Sub Δ Γ) :
   (forall_app A P t u) [σ]t = forall_app (A [σ]t) (P [lift σ A]t) (t [σ]t) (u [σ]t).
+Proof.
+  reflexivity.
+Qed.
+
+(* Logical conjunction
+   It could alternatively be derived from impredicative forall, but a direct definition is more convenient. *)
+
+Definition conj {Γ : Con} (P Q : Tm Γ (Ω Γ)) : Tm Γ (Ω Γ).
+Proof.
+  unshelve econstructor.
+  - exact (fun γ => sand (fsts P γ) (fsts Q γ)).
+  - intros γ0 γ1 γe. constructor.
+    + intro H. exact (sand_intro (sand_fst (snds P γ0 γ1 γe) (sand_fst H)) (sand_fst (snds Q γ0 γ1 γe) (sand_snd H))).
+    + intro H. exact (sand_intro (sand_snd (snds P γ0 γ1 γe) (sand_fst H)) (sand_snd (snds Q γ0 γ1 γe) (sand_snd H))).
+Defined.
+
+Lemma substConj {Γ Δ : Con} (P Q : Tm Γ (Ω Γ)) (σ : Sub Δ Γ) : (conj P Q) [σ]t = conj (P [σ]t) (Q [σ]t).
+Proof.
+  reflexivity.
+Qed.
+
+(* Logical implication
+   It could alternatively be derived from impredicative forall, but a direct definition is more convenient. *)
+
+Definition impl {Γ : Con} (P Q : Tm Γ (Ω Γ)) : Tm Γ (Ω Γ).
+Proof.
+  unshelve econstructor.
+  - exact (fun γ => (fsts P γ) -> (fsts Q γ)).
+  - intros γ0 γ1 γe. constructor.
+    + intros H p. exact (sand_fst (snds Q γ0 γ1 γe) (H (sand_snd (snds P γ0 γ1 γe) p))).
+    + intros H p. exact (sand_snd (snds Q γ0 γ1 γe) (H (sand_fst (snds P γ0 γ1 γe) p))).
+Defined.
+
+Lemma substImpl {Γ Δ : Con} (P Q : Tm Γ (Ω Γ)) (σ : Sub Δ Γ) : (impl P Q) [σ]t = impl (P [σ]t) (Q [σ]t).
 Proof.
   reflexivity.
 Qed.
@@ -725,7 +759,7 @@ Proof.
   reflexivity.
 Qed.
 
-(* Properties of the equality: symmetry, transitivity, function congruence *)
+(* Properties of equality: symmetry, transitivity, function congruence *)
 
 Definition sym {Γ : Con} (A : TY Γ) (x y : TM Γ A) (e : Tm Γ (Prf (obseq A x y))) : Tm Γ (Prf (obseq A y x)).
 Proof.
@@ -769,5 +803,45 @@ Proof.
   reflexivity.
 Qed.
 
-(* TODO: funext and propext *)
+(* Function extensionality *)
+
+Definition funext {Γ : Con} (A : Ty Γ) (P : Ty (Γ ▸ A)) (f g : Tm Γ (Π A P))
+  (e : Tm Γ (Prf (for_all A (obseq (El P) (app (A [wk A]t) (P [lift (wk A) A]t) (f [wk A]t) (var0 A))
+                                          (app (A [wk A]t) (P [lift (wk A) A]t) (g [wk A]t) (var0 A)))))) :
+  Tm Γ (Prf (obseq (El (Π A P)) f g)).
+Proof.
+  unshelve econstructor.
+  - refine (fun γ => to_set_intro _ (fun a0 a1 ae => _)). change (eq0 (fsts A γ) (fsts A γ) a0 a1) in ae.
+    change (eq0 (fsts P (mkPair γ a0)) (fsts P (mkPair γ a1)) (fsts (fsts f γ) a0) (fsts (fsts g γ) a1)).
+    exact (trans0 (fsts P (mkPair γ a0)) (fsts P (mkPair γ a0)) (reflU0 (fsts P (mkPair γ a0))) (fsts P (mkPair γ a1))
+                   (to_set_esc _ (fsts e γ) a0) (snds (fsts g γ) a0 a1 ae)).
+  - exact (fun γ0 γ1 γe => stt).
+Defined.
+
+Lemma substFunext {Γ Δ : Con} (A : Ty Γ) (P : Ty (Γ ▸ A)) (f g : Tm Γ (Π A P))
+  (e : Tm Γ (Prf (for_all A (obseq (El P) (app (A [wk A]t) (P [lift (wk A) A]t) (f [wk A]t) (var0 A))
+                                          (app (A [wk A]t) (P [lift (wk A) A]t) (g [wk A]t) (var0 A))))))
+  (σ : Sub Δ Γ) : (funext A P f g e) [σ]t = funext (A [σ]t) (P [lift σ A]t) (f [σ]t) (g [σ]t) (e [σ]t).
+Proof.
+  reflexivity.
+Qed.
+
+(* Proposition extensionality *)
+
+Definition propext {Γ : Con} (P Q : Tm Γ (Ω Γ)) (e : Tm Γ (Prf (conj (impl P Q) (impl Q P))))
+  : Tm Γ (Prf (obseq (El (Ω Γ)) P Q)).
+Proof.
+  unshelve econstructor.
+  - refine (fun γ => to_set_intro _ (sand_intro _ _)).
+    + exact (fun p => sand_fst (to_set_esc _ (fsts e γ)) p).
+    + exact (fun q => sand_snd (to_set_esc _ (fsts e γ)) q).
+  - exact (fun γ0 γ1 γe => stt).
+Defined.
+
+Lemma substPropext {Γ Δ : Con} (P Q : Tm Γ (Ω Γ)) (e : Tm Γ (Prf (conj (impl P Q) (impl Q P)))) (σ : Sub Δ Γ)
+  : (propext P Q e) [σ]t = propext (P [σ]t) (Q [σ]t) (e [σ]t).
+Proof.
+  reflexivity.
+Qed.
+
 (* TODO: W types and quotients. See model.v for a somewhat less careful version. *)
