@@ -59,6 +59,21 @@ Arguments clo_refl {_} {_} {_}.
 Arguments clo_sym {_} {_} {_}.
 Arguments clo_trans {_} {_} {_}.
 
+(* Forded identity type *)
+
+Inductive fordedId@{i} (A : Type@{i}) (Ae : A -> A -> SProp) (a : A) : A -> Type@{i} :=
+| frefl : fordedId A Ae a a
+| forded : forall (b : A), Ae a b -> fordedId A Ae a b.
+Arguments frefl {_} {_} {_}.
+Arguments forded {_} {_} {_} {_}.
+
+Definition obseq_of_fordedId (A : Type) (Ae : A -> A -> SProp) (refl : forall a, Ae a a) (a b : A) : fordedId A Ae a b -> Ae a b.
+Proof.
+  intro p. destruct p as [ | b p ].
+  - apply refl.
+  - exact p.
+Defined.
+
 (* Setoid equality on the natural numbers *)
 
 Inductive nateq : nat -> nat -> SProp :=

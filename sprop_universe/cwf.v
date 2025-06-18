@@ -487,25 +487,18 @@ Qed.
 
 (* eliminator *)
 
-Definition ℕemb (n : nat) (Γ : Con) : Tm Γ (ℕ Γ).
-Proof.
-  unshelve econstructor.
-  - exact (fun _ => n).
-  - exact (fun _ _ _ => nateq_refl n).
-Defined.
-
 Definition ℕrec (Γ : Con) (P : TY (Γ ▸ (ℕ Γ))) (pZ : TM Γ (P [sgSub (ℕz Γ)]T))
   (pS : TM (Γ ▸ (ℕ Γ)) (ARR P (P [(subExt (El (ℕ Γ)) (wk (ℕ Γ)) (ℕS (Γ ▸ (ℕ Γ)) (var0 (ℕ Γ))))]T)))
   (n : Tm Γ (ℕ Γ)) : TM Γ (P [sgSub n]T).
 Proof.
   unshelve econstructor.
-  - intro γ. refine (nat_rect (fun n => El1 (fsts (P [@sgSub Γ (ℕ Γ) (ℕemb n Γ)]T) γ)) _ _ (fsts n γ)).
+  - intro γ. refine (nat_rect (fun n => El1 (fsts P (mkPair γ n))) _ _ (fsts n γ)).
     + exact (fsts pZ γ).
     + intros m IH. exact (fsts (fsts pS (mkPair γ m)) IH).
   - intros γ0 γ1 γe.
     refine (nateq_sind (fun n0 n1 ne => eq1 _ _
-        (nat_rect (fun n => El1 (fsts (P [@sgSub Γ (ℕ Γ) (ℕemb n Γ)]T) γ0)) (fsts pZ γ0) (fun m IH => fsts (fsts pS (mkPair γ0 m)) IH) n0)
-        (nat_rect (fun n => El1 (fsts (P [@sgSub Γ (ℕ Γ) (ℕemb n Γ)]T) γ1)) (fsts pZ γ1) (fun m IH => fsts (fsts pS (mkPair γ1 m)) IH) n1))
+        (nat_rect (fun n => El1 (fsts P (mkPair γ0 n))) (fsts pZ γ0) (fun m IH => fsts (fsts pS (mkPair γ0 m)) IH) n0)
+        (nat_rect (fun n => El1 (fsts P (mkPair γ1 n))) (fsts pZ γ1) (fun m IH => fsts (fsts pS (mkPair γ1 m)) IH) n1))
       _ _ (fsts n γ0) (fsts n γ1) (snds n γ0 γ1 γe)).
     + exact (snds pZ γ0 γ1 γe).
     + intros m0 m1 me IH. refine (snds pS (mkPair γ0 m0) (mkPair γ1 m1) (mkAndEx γe me) _ _ IH).
@@ -844,4 +837,141 @@ Proof.
   reflexivity.
 Qed.
 
-(* TODO: W types and quotients. See model.v for a somewhat less careful version. *)
+(* Martin-Löf identity types *)
+
+Definition idty {Γ : Con} (A : Ty Γ) (a b : Tm Γ A) : Ty Γ.
+Proof.
+  unshelve econstructor.
+  - exact (fun γ => Id0 (fsts A γ) (fsts a γ) (fsts b γ)).
+  - intros γ0 γ1 γe. constructor.
+    + exact (snds A γ0 γ1 γe).
+    + split. exact (snds a γ0 γ1 γe). exact (snds b γ0 γ1 γe).
+Defined.
+
+Lemma substIdty {Γ Δ : Con} (A : Ty Γ) (a b : Tm Γ A) (σ : Sub Δ Γ) : (idty A a b) [σ]t = idty (A [σ]t) (a [σ]t) (b [σ]t).
+Proof.
+  reflexivity.
+Qed.
+
+(* reflexivity *)
+
+Definition idty_refl {Γ : Con} (A : Ty Γ) (a : Tm Γ A) : Tm Γ (idty A a a).
+Proof.
+  unshelve econstructor.
+  - exact (fun γ => frefl).
+  - intros. exact stt.
+Defined.
+
+Lemma substIdty_refl {Γ Δ : Con} (A : Ty Γ) (a : Tm Γ A) (σ : Sub Δ Γ) : (idty_refl A a) [σ]t = idty_refl (A [σ]t) (a [σ]t).
+Proof.
+  reflexivity.
+Qed.
+
+(* J eliminator *)
+
+Definition idtySub {Γ : Con} (A : Ty Γ) (a b : Tm Γ A) (e : Tm Γ (idty A a b)) : Sub Γ (Γ ▸ A ▸ (idty (A [wk A]t) (a [wk A]t) (var0 A))).
+Proof.
+  unshelve econstructor.
+  - exact (fun γ => mkPair (mkPair γ (fsts b γ)) (fsts e γ)).
+  - exact (fun γ0 γ1 γe => mkAndEx (mkAndEx γe (snds b γ0 γ1 γe)) stt).
+Defined.
+
+Definition Jelim_aux {Γ : Con} (A : Ty Γ) (a : Tm Γ A) (P : TY (Γ ▸ A ▸ (idty (A [wk A]t) (a [wk A]t) (var0 A))))
+  (prefl : TM Γ (P [idtySub A a a (idty_refl A a) ]T))
+  (γ : El1 Γ) (b : El0 (fsts A γ)) (e : fordedId (El0 (fsts A γ)) (eq0 (fsts A γ) (fsts A γ)) (fsts a γ) b) :
+  El1 (fsts P (mkPair (mkPair γ b) e)).
+Proof.
+  refine (fordedId_rect (El0 (fsts A γ)) (eq0 (fsts A γ) (fsts A γ)) (fsts a γ)
+              (fun b e => El1 (fsts P (mkPair (mkPair γ b) e))) (fsts prefl γ) _ b e).
+  intros b0 e0.
+  refine (cast1 (fsts P (mkPair (mkPair γ (fsts a γ)) frefl))
+            (fsts P (mkPair (mkPair γ b0) (@forded (El0 (fsts A γ)) (eq0 (fsts A γ) (fsts A γ)) (fsts a γ) b0 e0)))
+            _ (fsts prefl γ)).
+  refine (snds P _ _ _). exact (mkAndEx (mkAndEx (refl1 Γ γ) e0) stt).
+Defined.
+
+Definition Jelim_aux_e {Γ : Con} (A : Ty Γ) (a : Tm Γ A) (P : TY (Γ ▸ A ▸ (idty (A [wk A]t) (a [wk A]t) (var0 A))))
+  (prefl : TM Γ (P [idtySub A a a (idty_refl A a) ]T))
+  (γ0 γ1 : El1 Γ) (γe : eq1 Γ Γ γ0 γ1) (b0 : El0 (fsts A γ0)) (b1 : El0 (fsts A γ1)) (be : eq0 (fsts A γ0) (fsts A γ1) b0 b1)
+  (e0 : fordedId (El0 (fsts A γ0)) (eq0 (fsts A γ0) (fsts A γ0)) (fsts a γ0) b0)
+  (e1 : fordedId (El0 (fsts A γ1)) (eq0 (fsts A γ1) (fsts A γ1)) (fsts a γ1) b1) :
+  eq1 (fsts P (mkPair (mkPair γ0 b0) e0)) (fsts P (mkPair (mkPair γ1 b1) e1)) (Jelim_aux A a P prefl γ0 b0 e0) (Jelim_aux A a P prefl γ1 b1 e1).
+Proof.
+  set (A0 := fsts A γ0). set (A1 := fsts A γ1). set (Ae := snds A γ0 γ1 γe).
+  set (a0 := fsts a γ0). set (a1 := fsts a γ1). set (ae := snds a γ0 γ1 γe).
+  destruct e0 as [ | b0 e0 ] ; destruct e1 as [ | b1 e1 ].
+  - exact (snds prefl γ0 γ1 γe).
+  - refine (trans1 (fsts P (mkPair (mkPair γ0 a0) frefl)) (fsts P (mkPair (mkPair γ1 a1) frefl)) _
+                   (fsts P (mkPair (mkPair γ1 b1) (@forded (El0 A1) (eq0 A1 A1) a1 b1 e1))) (snds prefl γ0 γ1 γe) _).
+    + refine (snds P _ _ _). exact (mkAndEx (mkAndEx γe ae) stt).
+    + apply cast1_eq.
+  - refine (trans1 (fsts P (mkPair (mkPair γ0 b0) (@forded (El0 A0) (eq0 A0 A0) a0 b0 e0)))
+                   (fsts P (mkPair (mkPair γ0 a0) frefl)) _ (fsts P (mkPair (mkPair γ1 a1) frefl)) _ (snds prefl γ0 γ1 γe)).
+    + refine (snds P _ _ _). exact (mkAndEx (mkAndEx (refl1 Γ γ0) (sym0 _ _ e0)) stt).
+    + apply sym1. apply cast1_eq.
+  - refine (trans1 (fsts P (mkPair (mkPair γ0 b0) (@forded (El0 A0) (eq0 A0 A0) a0 b0 e0)))
+                   (fsts P (mkPair (mkPair γ0 a0) frefl)) _ (fsts P (mkPair (mkPair γ1 b1) (@forded (El0 A1) (eq0 A1 A1) a1 b1 e1)))
+                   (b := fsts prefl γ0) _ _).
+    + refine (snds P _ _ _). exact (mkAndEx (mkAndEx (refl1 Γ γ0) (sym0 _ _ e0)) stt).
+    + apply sym1. apply cast1_eq.
+    + refine (trans1 (fsts P (mkPair (mkPair γ0 a0) frefl)) (fsts P (mkPair (mkPair γ1 a1) frefl)) _
+                     (fsts P (mkPair (mkPair γ1 b1) (@forded (El0 A1) (eq0 A1 A1) a1 b1 e1))) (snds prefl γ0 γ1 γe) _).
+      * refine (snds P _ _ _). exact (mkAndEx (mkAndEx γe ae) stt).
+      * apply cast1_eq.
+Defined.
+
+Definition Jelim {Γ : Con} (A : Ty Γ) (a : Tm Γ A) (P : TY (Γ ▸ A ▸ (idty (A [wk A]t) (a [wk A]t) (var0 A))))
+  (prefl : TM Γ (P [idtySub A a a (idty_refl A a) ]T)) (b : Tm Γ A) (e : Tm Γ (idty A a b))
+  : TM Γ (P [idtySub A a b e ]T).
+Proof.
+  unshelve econstructor.
+  - exact (fun γ => Jelim_aux A a P prefl γ (fsts b γ) (fsts e γ)).
+  - exact (fun γ0 γ1 γe => Jelim_aux_e A a P prefl γ0 γ1 γe (fsts b γ0) (fsts b γ1) (snds b γ0 γ1 γe) (fsts e γ0) (fsts e γ1)).
+Defined.
+
+Lemma substJelim {Γ Δ : Con} (A : Ty Γ) (a : Tm Γ A) (P : TY (Γ ▸ A ▸ (idty (A [wk A]t) (a [wk A]t) (var0 A))))
+  (prefl : TM Γ (P [idtySub A a a (idty_refl A a) ]T)) (b : Tm Γ A) (e : Tm Γ (idty A a b)) (σ : Sub Δ Γ)
+  : (Jelim A a P prefl b e) [σ]t = Jelim (A [σ]t) (a [σ]t) (P [lift (lift σ A) (idty (A [wk A]t) (a [wk A]t) (var0 A))]T) (prefl [σ]t) (b [σ]t) (e [σ]t).
+Proof.
+  reflexivity.
+Qed.
+
+(* The J eliminator satisfies β definitionally *)
+
+Lemma idtyβ {Γ : Con} (A : Ty Γ) (a : Tm Γ A) (P : TY (Γ ▸ A ▸ (idty (A [wk A]t) (a [wk A]t) (var0 A))))
+  (prefl : TM Γ (P [idtySub A a a (idty_refl A a) ]T))
+  : Jelim A a P prefl a (idty_refl A a) = prefl.
+Proof.
+  reflexivity.
+Qed.
+
+(* The identity type is logically equivalent to the observational equality.
+   Thus, it satisfies funext and propext *)
+
+Definition obseq_of_idty {Γ : Con} (A : Ty Γ) (a b : Tm Γ A) (e : Tm Γ (idty A a b)) : Tm Γ (Prf (obseq (El A) a b)).
+Proof.
+  unshelve econstructor.
+  - refine (fun γ => to_set_intro _ _).
+    exact (obseq_of_fordedId (El0 (fsts A γ)) (eq0 (fsts A γ) (fsts A γ)) (refl0 (fsts A γ)) (fsts a γ) (fsts b γ) (fsts e γ)).
+  - intros γ0 γ1 γe. exact stt.
+Defined.
+
+Lemma substObseq_of_idty {Γ Δ : Con} (A : Ty Γ) (a b : Tm Γ A) (e : Tm Γ (idty A a b)) (σ : Sub Δ Γ)
+  : (obseq_of_idty A a b e) [σ]t = obseq_of_idty (A [σ]t) (a [σ]t) (b [σ]t) (e [σ]t).
+Proof.
+  reflexivity.
+Qed.
+
+Definition idty_of_obseq {Γ : Con} (A : Ty Γ) (a b : Tm Γ A) (e : Tm Γ (Prf (obseq (El A) a b))) : Tm Γ (idty A a b).
+Proof.
+  unshelve econstructor.
+  - refine (fun γ => forded (to_set_esc _ _)).
+    exact (fsts e γ).
+  - intros γ0 γ1 γe. exact stt.
+Defined.
+
+Lemma substIdty_of_obseq {Γ Δ : Con} (A : Ty Γ) (a b : Tm Γ A) (e : Tm Γ (Prf (obseq (El A) a b))) (σ : Sub Δ Γ)
+  : (idty_of_obseq A a b e) [σ]t = idty_of_obseq (A [σ]t) (a [σ]t) (b [σ]t) (e [σ]t).
+Proof.
+  reflexivity.
+Qed.

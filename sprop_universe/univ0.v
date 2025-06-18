@@ -26,7 +26,6 @@ Require Import utils.
    a proof A'' that the pair (A, A') is in extU0.
  *)
 
-
 Inductive inU0@{i j} : Type@{i} -> Type@{j} :=
 | cEmb0 : forall (P : SProp), inU0 (to_set P)
 | cN : inU0 nat
@@ -44,63 +43,71 @@ Inductive inU0@{i j} : Type@{i} -> Type@{j} :=
     inU0 (Sigma (W A P) (Wext A Aeq P Peq))
 | cQuo : forall (A : Type@{i}) (Au : inU0 A) (Aeq : A -> A -> SProp)
                 (R : A -> A -> SProp),
-    inU0 A.
+    inU0 A
+| cId : forall (A : Type@{i}) (Au : inU0 A) (Aeq : A -> A -> SProp) (a b : A),
+    inU0 (fordedId A Aeq a b).
 
 (* This definition ignores all of Aeq, Peq, or the proofs of Piext/Wext *)
 Definition inU0_eq@{i j} {A : Type@{i}} (Au : inU0@{i j} A) {B : Type@{i}} (Bu : inU0@{i j} B) (a : A) (b : B) : SProp.
 Proof.
-  revert B Bu a b. induction Au as [ P | | | A Au IHA P Pu IHP | A Au IHA Aeq P Pu IHP Peq | A Au IHA Aeq P Pu IHP Peq | A Au IHA Aeq R ].
-  - intros _ [ Q | | | | | | ].
-    2,3,4,5,6,7: exact (fun _ _ => sFalse).
+  revert B Bu a b. induction Au as [ P | | | A Au IHA P Pu IHP | A Au IHA Aeq P Pu IHP Peq | A Au IHA Aeq P Pu IHP Peq | A Au IHA Aeq R | A Au IHA Aeq a b ].
+  - intros _ [ Q | | | | | | | ].
+    2,3,4,5,6,7,8: exact (fun _ _ => sFalse).
     exact (fun _ _ => sTrue).
-  - intros _ [ | | | | | | ].
-    1,3,4,5,6,7: exact (fun _ _ => sFalse).
+  - intros _ [ | | | | | | | ].
+    1,3,4,5,6,7,8: exact (fun _ _ => sFalse).
     exact nateq.
-  - intros _ [ | | | | | | ].
-    1,2,4,5,6,7: exact (fun _ _ => sFalse).
+  - intros _ [ | | | | | | | ].
+    1,2,4,5,6,7,8: exact (fun _ _ => sFalse).
     exact (fun P Q => sand (P -> Q) (Q -> P)).
-  - intros _ [ | | | B Bu Q Qu | | | ].
-    1,2,3,5,6,7: exact (fun _ _ => sFalse).
+  - intros _ [ | | | B Bu Q Qu | | | | ].
+    1,2,3,5,6,7,8: exact (fun _ _ => sFalse).
     intros [ a p ] [ b q ].
     exact (and_ex (IHA B Bu a b) (IHP a (Q b) (Qu b) p q)).
-  - intros _ [ | | | | B Bu Beq Q Qu Qeq | | ].
-    1,2,3,4,6,7: exact (fun _ _ => sFalse).
+  - intros _ [ | | | | B Bu Beq Q Qu Qeq | | | ].
+    1,2,3,4,6,7,8: exact (fun _ _ => sFalse).
     intros [ f _ ] [ g _ ].
     exact (forall a b, IHA B Bu a b -> IHP a (Q b) (Qu b) (f a) (g b)).
-  - intros _ [ | | | | | B Bu Beq Q Qu Qeq | ].
-    1,2,3,4,5,7: exact (fun _ _ => sFalse).
+  - intros _ [ | | | | | B Bu Beq Q Qu Qeq | | ].
+    1,2,3,4,5,7,8: exact (fun _ _ => sFalse).
     intros [ f _ ] [ g _ ].
     exact (Weq (fun a b => IHA B Bu a b) (fun a b p q => IHP a (Q b) (Qu b) p q) f g).
-  - intros _ [ | | | | | | B Bu Beq S ].
-    1,2,3,4,5,6: exact (fun _ _ => sFalse).
+  - intros _ [ | | | | | | B Bu Beq S | ].
+    1,2,3,4,5,6,8: exact (fun _ _ => sFalse).
     exact (fun a b => sexists A (fun a1 => sexists B (fun b1 => sand (closure Aeq R a a1) (sand (IHA B Bu a1 b1) (closure Beq S b1 b))))).
+  - intros _ [ | | | | | | | B Bu Beq c d ].
+    1,2,3,4,5,6,7: exact (fun _ _ => sFalse).
+    exact (fun a b => sTrue).
 Defined.
 
 (* Likewise, this definition does not care about Aeq, Peq, proofs of Pi_ext/Wext *)
 Definition inU0_eqU@{i j} {A : Type@{i}} (Au : inU0@{i j} A) {B : Type@{i}} (Bu : inU0@{i j} B) : SProp.
 Proof.
-  revert B Bu. induction Au as [ P | | | A Au IHA P Pu IHP | A Au IHA Aeq P Pu IHP Peq | A Au IHA Aeq P Pu IHP Peq | A Au IHA Aeq R ].
-  - intros _ [ Q | | | | | | ].
-    2,3,4,5,6,7: exact sFalse.
+  revert B Bu. induction Au as [ P | | | A Au IHA P Pu IHP | A Au IHA Aeq P Pu IHP Peq | A Au IHA Aeq P Pu IHP Peq | A Au IHA Aeq R | A Au IHA Aeq a b].
+  - intros _ [ Q | | | | | | | ].
+    2,3,4,5,6,7,8: exact sFalse.
     exact (sand (P -> Q) (Q -> P)).
-  - intros _ [ | | | | | | ].
-    1,3,4,5,6,7: exact sFalse.
+  - intros _ [ | | | | | | | ].
+    1,3,4,5,6,7,8: exact sFalse.
     exact sTrue.
-  - intros _ [ | | | | | | ].
-    1,2,4,5,6,7: exact sFalse.
+  - intros _ [ | | | | | | | ].
+    1,2,4,5,6,7,8: exact sFalse.
     exact sTrue.
-  - intros _ [ | | | B Bu Q Qu | | | ].
-    1,2,3,5,6,7: exact sFalse.
+  - intros _ [ | | | B Bu Q Qu | | | | ].
+    1,2,3,5,6,7,8: exact sFalse.
     exact (sand (IHA B Bu) (forall a b, inU0_eq Au Bu a b -> IHP a (Q b) (Qu b))).
-  - intros _ [ | | | | B Bu Beq Q Qu Qeq | | ].
-    1,2,3,4,6,7: exact sFalse.
+  - intros _ [ | | | | B Bu Beq Q Qu Qeq | | | ].
+    1,2,3,4,6,7,8: exact sFalse.
     exact (sand (IHA B Bu) (forall a b, inU0_eq Au Bu a b -> IHP a (Q b) (Qu b))).
-  - intros _ [ | | | | | B Bu Beq Q Qu Qeq | ].
-    1,2,3,4,5,7: exact sFalse.
+  - intros _ [ | | | | | B Bu Beq Q Qu Qeq | | ].
+    1,2,3,4,5,7,8: exact sFalse.
     exact (sand (IHA B Bu) (forall a b, inU0_eq Au Bu a b -> IHP a (Q b) (Qu b))).
-  - intros _ [ | | | | | | B Bu Beq S ].
-    1,2,3,4,5,6: exact sFalse.
+  - intros _ [ | | | | | | B Bu Beq S | ].
+    1,2,3,4,5,6,8: exact sFalse.
     exact (sand (IHA B Bu) (forall a0 b0 (e0 : inU0_eq Au Bu a0 b0) a1 b1 (e1 : inU0_eq Au Bu a1 b1), sand (R a0 a1 -> S b0 b1) (S b0 b1 -> R a0 a1))).
+  - intros _ [ | | | | | | | B Bu Beq c d ].
+    1,2,3,4,5,6,7: exact sFalse.
+    exact (sand (IHA B Bu) (sand (inU0_eq Au Bu a c) (inU0_eq Au Bu b d))).
 Defined.
 
 Inductive extU0@{i j} : forall (A : Type@{i}) (Au : inU0@{i j} A), Type@{j} :=
@@ -127,7 +134,9 @@ Inductive extU0@{i j} : forall (A : Type@{i}) (Au : inU0@{i j} A), Type@{j} :=
       (cW A Au (inU0_eq Au Au) P Pu (fun a0 a1 b0 b1 => inU0_eq (Pu a0) (Pu a1) b0 b1))
 | extQuo : forall (A : Type@{i}) (Au : inU0 A) (Ae : extU0 A Au) (R : A -> A -> SProp)
                   (Rext : forall a0 a1 (ae : inU0_eq Au Au a0 a1) b0 b1 (be : inU0_eq Au Au b0 b1), sand (R a0 b0 -> R a1 b1) (R a1 b1 -> R a0 b0)),
-    extU0 A (cQuo A Au (inU0_eq Au Au) R).
+    extU0 A (cQuo A Au (inU0_eq Au Au) R)
+| extId : forall (A : Type@{i}) (Au : inU0 A) (Ae : extU0 A Au) (a b : A),
+    extU0 (fordedId A (inU0_eq Au Au) a b) (cId A Au (inU0_eq Au Au) a b).
 
 Record U0@{i j} : Type@{j} :=
   mkU0 {
@@ -171,6 +180,8 @@ Definition W0 (A : U0) (B : El0 A -> U0) (Be : forall a0 a1 : El0 A, eq0 A A a0 
 Definition Quo0 (A : U0) (R : El0 A -> El0 A -> SProp)
                 (Re : forall a0 a1 (ae : eq0 A A a0 a1) b0 b1 (be : eq0 A A b0 b1), sand (R a0 b0 -> R a1 b1) (R a1 b1 -> R a0 b0)) : U0 :=
   mkU0 (extQuo (El0 A) (in0 A) (ext0 A) R Re).
+Definition Id0 (A : U0) (a b : El0 A) : U0 :=
+  mkU0 (extId (El0 A) (in0 A) (ext0 A) a b).
 
 (* Induction principles *)
 
@@ -186,11 +197,12 @@ Definition U0_rect@{i j k} (X : U0@{i j} -> Type@{k}) :
                       (Pe : forall a0 a1 : El0 A, eq0 A A a0 a1 -> eqU0 (P a0) (P a1)), X (W0 A P Pe))
          (Xquo : forall (A : U0) (IHA : X A) (R : El0 A -> El0 A -> SProp)
                       (Re : forall a0 a1 (ae : eq0 A A a0 a1) b0 b1 (be : eq0 A A b0 b1), sand (R a0 b0 -> R a1 b1) (R a1 b1 -> R a0 b0)), X (Quo0 A R Re))
+         (Xid : forall (A : U0) (IHA : X A) (a b : El0 A), X (Id0 A a b))
          (A : U0), X A.
 Proof.
   intros.
   destruct A as [A Au Ae].
-  induction Ae as [ P | | | A Au Ae IHA P Pu Pext Pe IHP | A Au Ae IHA P Pu Pext Pe IHP | A Au Ae IHA P Pu Pext Pe IHP | A Au Ae IHA R Rext ].
+  induction Ae as [ P | | | A Au Ae IHA P Pu Pext Pe IHP | A Au Ae IHA P Pu Pext Pe IHP | A Au Ae IHA P Pu Pext Pe IHP | A Au Ae IHA R Rext | A Au Ae IHA a b ].
   - exact (Xemb P).
   - exact Xnat.
   - exact Xprop.
@@ -198,6 +210,7 @@ Proof.
   - exact (Xpi (mkU0 Ae) IHA (fun a => mkU0 (Pe a)) IHP Pext).
   - exact (XW (mkU0 Ae) IHA (fun a => mkU0 (Pe a)) IHP Pext).
   - exact (Xquo (mkU0 Ae) IHA R Rext).
+  - exact (Xid (mkU0 Ae) IHA a b).
 Defined.
 
 Definition U0_ind@{i j} (X : U0@{i j} -> SProp) :
@@ -212,11 +225,12 @@ Definition U0_ind@{i j} (X : U0@{i j} -> SProp) :
                       (Pe : forall a0 a1 : El0 A, eq0 A A a0 a1 -> eqU0 (P a0) (P a1)), X (W0 A P Pe))
          (Xquo : forall (A : U0) (IHA : X A) (R : El0 A -> El0 A -> SProp)
                       (Re : forall a0 a1 (ae : eq0 A A a0 a1) b0 b1 (be : eq0 A A b0 b1), sand (R a0 b0 -> R a1 b1) (R a1 b1 -> R a0 b0)), X (Quo0 A R Re))
+         (Xid : forall (A : U0) (IHA : X A) (a b : El0 A), X (Id0 A a b))
          (A : U0), X A.
 Proof.
   intros.
   destruct A as [A Au Ae].
-  induction Ae as [ P | | | A Au Ae IHA P Pu Pext Pe IHP | A Au Ae IHA P Pu Pext Pe IHP | A Au Ae IHA P Pu Pext Pe IHP | A Au Ae IHA R Rext ].
+  induction Ae as [ P | | | A Au Ae IHA P Pu Pext Pe IHP | A Au Ae IHA P Pu Pext Pe IHP | A Au Ae IHA P Pu Pext Pe IHP | A Au Ae IHA R Rext | A Au Ae IHA a b ].
   - exact (Xemb P).
   - exact Xnat.
   - exact Xprop.
@@ -224,6 +238,7 @@ Proof.
   - exact (Xpi (mkU0 Ae) IHA (fun a => mkU0 (Pe a)) IHP Pext).
   - exact (XW (mkU0 Ae) IHA (fun a => mkU0 (Pe a)) IHP Pext).
   - exact (Xquo (mkU0 Ae) IHA R Rext).
+  - exact (Xid (mkU0 Ae) IHA a b).
 Defined.
 
 (* Double induction principle:
@@ -258,9 +273,12 @@ Definition U0_rect2@{i j k} (X : forall (A B : U0@{i j}), eqU0 A B -> Type@{k}) 
                         (Re : forall a0 a1 (ae : eq0 A A a0 a1) b0 b1 (be : eq0 A A b0 b1), sand (R a0 b0 -> R a1 b1) (R a1 b1 -> R a0 b0))
                         (Se : forall a0 a1 (ae : eq0 B B a0 a1) b0 b1 (be : eq0 B B b0 b1), sand (S a0 b0 -> S a1 b1) (S a1 b1 -> S a0 b0)),
              X (Quo0 A R Re) (Quo0 B S Se) (sand_intro eAB eRS))
+         (Xid : forall (A B : U0@{i j}) (eAB : eqU0 A B) (IHA : X A B eAB)
+                       (a b : El0 A) (c d : El0 B) (eac : eq0 A B a c) (ebd : eq0 A B b d),
+             X (Id0 A a b) (Id0 B c d) (sand_intro eAB (sand_intro eac ebd)))
          (A B : U0@{i j}) (e : eqU0 A B), X A B e.
 Proof.
-  intros Xemb Xnat Xprop Xsigma Xpi XW Xquo A.
+  intros Xemb Xnat Xprop Xsigma Xpi XW Xquo Xid A.
   pattern A ; eapply U0_rect@{i j k}.
   - clear A. intros P B. pattern B ; eapply U0_rect@{i j k} ; try (now intros []).
     clear B. intros Q ePQ. exact (Xemb P Q ePQ).
@@ -283,6 +301,10 @@ Proof.
   - clear A. intros A IHA R Re B. pattern B ; eapply U0_rect@{i j k} ; try (now intros []) ; try easy.
     clear B. intros B _ S Se e. pose proof (sand_fst e) as eAB. pose proof (sand_snd e) as eRS.
     refine (Xquo A B eAB _ R S eRS Re Se).
+    exact (IHA B eAB).
+  - clear A. intros A IHA a b B. pattern B ; eapply U0_rect@{i j k} ; try (now intros []) ; try easy.
+    clear B. intros B _ c d e. pose proof (sand_fst e) as eAB. pose proof (sand_fst (sand_snd e)) as eac.
+    pose proof (sand_snd (sand_snd e)) as ebd. refine (Xid A B eAB _ a b c d eac ebd).
     exact (IHA B eAB).
 Defined.
 
@@ -314,9 +336,12 @@ Definition U0_ind2@{i j} (X : forall (A B : U0@{i j}), eqU0 A B -> SProp) :
                         (Re : forall a0 a1 (ae : eq0 A A a0 a1) b0 b1 (be : eq0 A A b0 b1), sand (R a0 b0 -> R a1 b1) (R a1 b1 -> R a0 b0))
                         (Se : forall a0 a1 (ae : eq0 B B a0 a1) b0 b1 (be : eq0 B B b0 b1), sand (S a0 b0 -> S a1 b1) (S a1 b1 -> S a0 b0)),
              X (Quo0 A R Re) (Quo0 B S Se) (sand_intro eAB eRS))
+         (Xid : forall (A B : U0@{i j}) (eAB : eqU0 A B) (IHA : X A B eAB)
+                       (a b : El0 A) (c d : El0 B) (eac : eq0 A B a c) (ebd : eq0 A B b d),
+             X (Id0 A a b) (Id0 B c d) (sand_intro eAB (sand_intro eac ebd)))
          (A B : U0@{i j}) (e : eqU0 A B), X A B e.
 Proof.
-  intros Xemb Xnat Xprop Xsigma Xpi XW Xquo A.
+  intros Xemb Xnat Xprop Xsigma Xpi XW Xquo Xid A.
   pattern A ; eapply U0_ind@{i j}.
   - clear A. intros P B. pattern B ; eapply U0_ind@{i j} ; try (now intros []).
     clear B. intros Q ePQ. exact (Xemb P Q ePQ).
@@ -339,5 +364,9 @@ Proof.
   - clear A. intros A IHA R Re B. pattern B ; eapply U0_ind@{i j} ; try (now intros []) ; try easy.
     clear B. intros B _ S Se e. pose proof (sand_fst e) as eAB. pose proof (sand_snd e) as eRS.
     refine (Xquo A B eAB _ R S eRS Re Se).
+    exact (IHA B eAB).
+  - clear A. intros A IHA a b B. pattern B ; eapply U0_ind@{i j} ; try (now intros []) ; try easy.
+    clear B. intros B _ c d e. pose proof (sand_fst e) as eAB. pose proof (sand_fst (sand_snd e)) as eac.
+    pose proof (sand_snd (sand_snd e)) as ebd. refine (Xid A B eAB _ a b c d eac ebd).
     exact (IHA B eAB).
 Defined.

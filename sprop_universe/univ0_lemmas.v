@@ -29,29 +29,33 @@ Proof.
   - clear A. intros A IHA R Re a. exists a. exists a. split.
     + eapply clo_refl. eapply IHA.
     + split. eapply IHA. eapply clo_refl. eapply IHA.
+  - clear A. intros A IHA a b p. exact stt.
 Defined.
 
 Definition reflU0 (A : U0) : eqU0 A A.
 Proof.
-  pattern A ; eapply U0_ind ; now econstructor.
+  pattern A ; eapply U0_ind ; try (now econstructor).
+  - clear A. intros A IHA a b. constructor.
+    + assumption.
+    + constructor ; eapply refl0.
 Defined.
 
 Definition sym0_pre (A B : U0) {a : El0 A} {b : El0 B} : sand (eq0 A B a b -> eq0 B A b a) (eq0 B A b a -> eq0 A B a b).
 Proof.
   revert B a b. pattern A ; eapply U0_ind ; clear A.
   - intros P B ; pattern B ; eapply U0_ind ; clear B.
-    2,3,4,5,6,7: intros ; split ; now intros [].
+    2,3,4,5,6,7,8: intros ; split ; now intros [].
     intros Q p q. easy.
   - intro B ; pattern B ; eapply U0_ind ; clear B.
-    1,3,4,5,6,7: intros ; split ; now intros [].
+    1,3,4,5,6,7,8: intros ; split ; now intros [].
     intros a b. split ; exact nateq_sym.
   - intro B ; pattern B ; eapply U0_ind ; clear B.
-    1,2,4,5,6,7: intros ; split ; now intros [].
+    1,2,4,5,6,7,8: intros ; split ; now intros [].
     intros a b. split.
     + intro H. split. exact (sand_snd H). exact (sand_fst H).
     + intro H. split. exact (sand_snd H). exact (sand_fst H).
   - intros A IHA P IHP Pe. intro B ; pattern B ; eapply U0_ind ; clear B.
-    1,2,3,5,6,7: intros ; split ; now intros [].
+    1,2,3,5,6,7,8: intros ; split ; now intros [].
     intros B _ Q _ Qe t u. split.
     + intros [ eap epq ]. split.
       * apply IHA. exact eap.
@@ -60,12 +64,12 @@ Proof.
       * apply IHA. exact eap.
       * apply IHP. exact epq.
   - intros A IHA P IHP Pe. intro B ; pattern B ; eapply U0_ind ; clear B.
-    1,2,3,4,6,7: intros ; split ; now intros [].
+    1,2,3,4,6,7,8: intros ; split ; now intros [].
     intros B _ Q _ Qe f g. split.
     + intros e b a eba. eapply IHP. apply (sand_snd (IHA B a b)) in eba. exact (e a b eba).
     + intros e a b eab. eapply IHP. apply (sand_fst (IHA B a b)) in eab. exact (e b a eab).
   - intros A IHA P IHP Pe. intro B ; pattern B ; eapply U0_ind ; clear B.
-    1,2,3,4,5,7: intros ; split ; now intros [].
+    1,2,3,4,5,7,8: intros ; split ; now intros [].
     intros B _ Q _ Qe.
     change (forall (w0 : El0 (W0 A P Pe)) (w1 : El0 (W0 B Q Qe)),
                sand ((Weq (eq0 A B) (fun a b => eq0 (P a) (Q b)) (fst w0) (fst w1))
@@ -83,7 +87,7 @@ Proof.
       * intros p q epq. unshelve eapply (IH q p _).
         eapply IHP. exact epq.
   - intros A IHA R Re. intro B ; pattern B ; eapply U0_ind ; clear B.
-    1,2,3,4,5,6: intros ; split ; now intros [].
+    1,2,3,4,5,6,8: intros ; split ; now intros [].
     intros B _ S Se. intros a b. split.
     + intros [ a1 [ b1 [ ae [ e be ] ] ] ].
       exists b1. exists a1. split. exact (clo_sym _ _ be).
@@ -91,6 +95,9 @@ Proof.
     + intros [ b1 [ a1 [ be [ e ae ] ] ] ].
       exists a1. exists b1. split. exact (clo_sym _ _ ae).
       split. apply (IHA B a1 b1). exact e. exact (clo_sym _ _ be).
+  - intros A IHA a b. intro B ; pattern B ; eapply U0_ind ; clear B.
+    1,2,3,4,5,6,7: intros ; split ; now intros [].
+    intros B _ c d p q. constructor ; easy.
 Defined.
 
 Definition sym0 (A B : U0) {a : El0 A} {b : El0 B} : eq0 A B a b -> eq0 B A b a.
@@ -102,39 +109,39 @@ Definition symU0_pre (A B : U0) : sand (eqU0 A B -> eqU0 B A) (eqU0 B A -> eqU0 
 Proof.
   revert B. pattern A ; eapply U0_ind ; clear A.
   - intro P. intro B ; pattern B ; eapply U0_ind ; clear B.
-    2,3,4,5,6,7: split ; now intros [].
+    2,3,4,5,6,7,8: split ; now intros [].
     intro Q. split.
     + intro H. split. exact (sand_snd H). exact (sand_fst H).
     + intro H. split. exact (sand_snd H). exact (sand_fst H).
   - intro B ; pattern B ; eapply U0_ind ; clear B.
-    1,3,4,5,6,7: split ; now intros [].
+    1,3,4,5,6,7,8: split ; now intros [].
     easy.
   - intro B ; pattern B ; eapply U0_ind ; clear B.
-    1,2,4,5,6,7: split ; now intros [].
+    1,2,4,5,6,7,8: split ; now intros [].
     easy.
   - intros A IHA P IHP Pe. intro B ; pattern B ; eapply U0_ind ; clear B.
-    1,2,3,5,6,7: split ; now intros [].
+    1,2,3,5,6,7,8: split ; now intros [].
     intros B _ Q _ Qe. split.
     + intros [ eAB ePQ ]. apply IHA in eAB. econstructor.
       exact eAB. intros a b eab. eapply IHP. eapply ePQ. eapply sym0. exact eab.
     + intros [ eAB ePQ ]. apply IHA in eAB. econstructor.
       exact eAB. intros a b eab. eapply IHP. eapply ePQ. eapply sym0. exact eab.
   - intros A IHA P IHP Pe. intro B ; pattern B ; eapply U0_ind ; clear B.
-    1,2,3,4,6,7: split ; now intros [].
+    1,2,3,4,6,7,8: split ; now intros [].
     intros B _ Q _ Qe. split.
     + intros [ eAB ePQ ]. apply IHA in eAB. econstructor.
       exact eAB. intros a b eab. eapply IHP. eapply ePQ. eapply sym0. exact eab.
     + intros [ eAB ePQ ]. apply IHA in eAB. econstructor.
       exact eAB. intros a b eab. eapply IHP. eapply ePQ. eapply sym0. exact eab.
   - intros A IHA P IHP Pe. intro B ; pattern B ; eapply U0_ind ; clear B.
-    1,2,3,4,5,7: split ; now intros [].
+    1,2,3,4,5,7,8: split ; now intros [].
     intros B _ Q _ Qe. split.
     + intros [ eAB ePQ ]. apply IHA in eAB. econstructor.
       exact eAB. intros a b eab. eapply IHP. eapply ePQ. eapply sym0. exact eab.
     + intros [ eAB ePQ ]. apply IHA in eAB. econstructor.
       exact eAB. intros a b eab. eapply IHP. eapply ePQ. eapply sym0. exact eab.
   - intros A IHA R Re. intro B ; pattern B ; eapply U0_ind ; clear B.
-    1,2,3,4,5,6: split ; now intros [].
+    1,2,3,4,5,6,8: split ; now intros [].
     intros B _ S Se. split.
     + intros [ eAB eRS ]. apply IHA in eAB. econstructor.
       exact eAB. intros a0 b0 e0 a1 b1 e1. split.
@@ -144,6 +151,13 @@ Proof.
       exact eBA. intros a0 b0 e0 a1 b1 e1. split.
       * refine (sand_snd (eSR b0 a0 (sym0 _ _ e0) b1 a1 (sym0 _ _ e1))).
       * refine (sand_fst (eSR b0 a0 (sym0 _ _ e0) b1 a1 (sym0 _ _ e1))).
+  - intros A IHA a b. intro B ; pattern B ; eapply U0_ind ; clear B.
+    1,2,3,4,5,6,7: split ; now intros [].
+    intros B _ c d. split.
+    + intros [ eAB [ eac ebd ] ]. split. apply IHA. exact eAB.
+      split. apply sym0. exact eac. apply sym0. exact ebd.
+    + intros [ eBA [ eca edb ] ]. split. apply IHA. exact eBA.
+      split. apply sym0. exact eca. apply sym0. exact edb.
 Defined.
 
 Definition symU0 (A B : U0) : eqU0 A B -> eqU0 B A.
@@ -448,6 +462,20 @@ Proof.
     + intros b. exists b. exists (castb IHA b). split.
       * eapply clo_refl. eapply refl0.
       * split. exact (castb_eq IHA b). eapply clo_refl. eapply refl0.
+  (* Identity types *)
+  - intros A B eAB IHA a b c d eac ebd. unshelve econstructor.
+    + intro p. refine (forded _).
+      refine (transb IHA B (sym0 A B eac) _).
+      refine (sym0 B A (transb IHA A (sym0 A B ebd) (sym0 A A _))).
+      exact (obseq_of_fordedId (El0 A) (eq0 A A) (refl0 A) a b p).
+    + intro p. refine (forded _).
+      refine (transf IHA A eac _).
+      refine (sym0 A B (transf IHA B ebd (sym0 B B _))).
+      exact (obseq_of_fordedId (El0 B) (eq0 B B) (refl0 B) c d p).
+    + intro C. pattern C ; eapply U0_ind ; clear C ; try easy.
+    + intro C. pattern C ; eapply U0_ind ; clear C ; try easy.
+    + intros. exact stt.
+    + intros. exact stt.
 Defined.
 
 Definition trans0@{i j} (A : U0@{i j}) (B : U0@{i j}) (e : eqU0 A B) (C : U0@{i j}) {a b c} :
@@ -511,4 +539,9 @@ Proof.
       pose proof (cast0_eq A B eAB a1) as eab1. change (eq0 A B a1 b1) in eab1.
       pose proof (trans0 B A (symU0 A B eAB) C (sym0 A B eab1) eac1) as ebc1.
       exact (iff_trans_s _ _ _ (eRS a0 b0 eab0 a1 b1 eab1) (eST b0 c0 ebc0 b1 c1 ebc1)).
+  - intros A B eAB IHA a b c d eac ebd. intro C.
+    pattern C ; eapply U0_ind ; clear C ; try easy.
+    intros C _ f g [ eBC [ ecf edg ] ]. split.
+    + exact (IHA C eBC).
+    + split. exact (trans0 A B eAB C eac ecf). exact (trans0 A B eAB C ebd edg).
 Defined.
